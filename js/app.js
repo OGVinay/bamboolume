@@ -321,12 +321,16 @@ class App {
   updateWishlistCount() {
     const el = document.getElementById('wishlist-count');
     const drawerCount = document.getElementById('wishlist-drawer-count');
+    const mobileCount = document.getElementById('mobile-wishlist-count');
     if (el) {
       el.textContent = this.wishlist.length;
       el.classList.toggle('hidden', this.wishlist.length === 0);
     }
     if (drawerCount) {
       drawerCount.textContent = `(${this.wishlist.length})`;
+    }
+    if (mobileCount) {
+      mobileCount.textContent = this.wishlist.length;
     }
   }
 
@@ -1231,6 +1235,67 @@ class App {
     document.getElementById('close-modal-btn')?.addEventListener('click', () => this.closeProductModal());
     document.getElementById('product-modal-overlay')?.addEventListener('click', (e) => {
       if (e.target.id === 'product-modal-overlay') this.closeProductModal();
+    });
+
+    // Mobile Navigation Drawer Toggle
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const mobileNavDrawer = document.getElementById('mobile-nav-drawer');
+    const toggleMobileMenu = (forceClose = false) => {
+      if (!mobileNavDrawer) return;
+      const shouldOpen = forceClose ? false : mobileNavDrawer.classList.contains('hidden');
+      if (shouldOpen) {
+        mobileNavDrawer.classList.remove('hidden');
+        mobileMenuBtn?.classList.add('active');
+        if (mobileMenuBtn) {
+          mobileMenuBtn.innerHTML = `<i data-lucide="x"></i>`;
+          if (window.lucide) window.lucide.createIcons();
+        }
+      } else {
+        mobileNavDrawer.classList.add('hidden');
+        mobileMenuBtn?.classList.remove('active');
+        if (mobileMenuBtn) {
+          mobileMenuBtn.innerHTML = `<i data-lucide="menu"></i>`;
+          if (window.lucide) window.lucide.createIcons();
+        }
+      }
+    };
+
+    mobileMenuBtn?.addEventListener('click', () => toggleMobileMenu());
+
+    // Auto-close mobile drawer when any link is tapped
+    document.querySelectorAll('[data-mobile-link]').forEach(link => {
+      link.addEventListener('click', () => toggleMobileMenu(true));
+    });
+
+    // Mobile Search Input
+    const mobileSearchInput = document.getElementById('mobile-search-input');
+    mobileSearchInput?.addEventListener('input', (e) => {
+      const val = e.target.value;
+      this.handleSearchInput(val);
+      if (val.trim().length > 0) {
+        document.getElementById('collection-section')?.scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+
+    // Mobile Drawer Quick Action Triggers
+    document.getElementById('mobile-auth-trigger')?.addEventListener('click', () => {
+      toggleMobileMenu(true);
+      document.getElementById('nav-auth-btn')?.click();
+    });
+
+    document.getElementById('mobile-wishlist-trigger')?.addEventListener('click', () => {
+      toggleMobileMenu(true);
+      this.openWishlistDrawer();
+    });
+
+    document.getElementById('mobile-orders-trigger')?.addEventListener('click', () => {
+      toggleMobileMenu(true);
+      window.ordersManager?.openOrdersDrawer();
+    });
+
+    document.getElementById('mobile-faq-trigger')?.addEventListener('click', () => {
+      toggleMobileMenu(true);
+      this.openFaqModal();
     });
   }
 

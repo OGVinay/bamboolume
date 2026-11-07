@@ -60,7 +60,7 @@
 
       <!-- Action Navigation Buttons -->
       <div class="nav-actions">
-        <button class="nav-icon-btn" id="faq-btn" title="Solar Help & FAQ">
+        <button class="nav-icon-btn nav-btn-desktop-only" id="faq-btn" title="Solar Help & FAQ">
           <i data-lucide="help-circle"></i>
         </button>
 
@@ -68,17 +68,17 @@
           <i data-lucide="sun"></i>
         </button>
 
-        <button class="nav-icon-btn" id="wishlist-btn" title="View Wishlist">
+        <button class="nav-icon-btn nav-btn-desktop-only" id="wishlist-btn" title="View Wishlist">
           <i data-lucide="heart"></i>
           <span class="nav-badge-pill hidden" id="wishlist-count">0</span>
         </button>
 
-        <button class="nav-icon-btn" id="orders-btn" title="Track My Orders">
+        <button class="nav-icon-btn nav-btn-desktop-only" id="orders-btn" title="Track My Orders">
           <i data-lucide="package"></i>
         </button>
 
         <!-- User Account / Profile Menu -->
-        <div class="user-menu-container" id="user-menu-container">
+        <div class="user-menu-container nav-btn-desktop-only" id="user-menu-container">
           <button class="nav-auth-btn" id="nav-auth-btn" title="Sign In / My Account">
             <i data-lucide="user"></i>
             <span>Sign In</span>
@@ -107,9 +107,65 @@
 
         <button class="nav-cart-btn" id="cart-btn" title="Shopping Cart">
           <i data-lucide="shopping-bag"></i>
-          <span>Cart</span>
+          <span class="cart-btn-text">Cart</span>
           <span class="nav-badge-pill" id="cart-count" style="position: static; margin-left: 0.2rem;">0</span>
         </button>
+
+        <!-- Mobile Menu Toggle Button -->
+        <button class="nav-icon-btn mobile-menu-btn" id="mobile-menu-btn" title="Toggle Navigation Menu" aria-label="Toggle navigation menu">
+          <i data-lucide="menu" id="mobile-menu-icon"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Navigation Drawer / Dropdown -->
+    <div class="mobile-nav-drawer hidden" id="mobile-nav-drawer">
+      <div class="mobile-nav-content">
+        <!-- Mobile Search -->
+        <div class="mobile-search-box">
+          <i data-lucide="search" class="mobile-search-icon"></i>
+          <input type="text" id="mobile-search-input" class="mobile-search-input" placeholder="Search solar lanterns..." autocomplete="off">
+        </div>
+
+        <!-- Mobile Nav Links -->
+        <nav class="mobile-nav-links">
+          <a href="#collection-section" class="mobile-nav-link" data-mobile-link>
+            <i data-lucide="compass"></i>
+            <span>Lanterns Collection</span>
+          </a>
+          <a href="#simulator-section" class="mobile-nav-link" data-mobile-link>
+            <i data-lucide="moon"></i>
+            <span>Twilight Garden Demo</span>
+          </a>
+          <a href="#craftsmanship-section" class="mobile-nav-link" data-mobile-link>
+            <i data-lucide="feather"></i>
+            <span>Artisan Craftsmanship</span>
+          </a>
+          <a href="#solar-tech-section" class="mobile-nav-link" data-mobile-link>
+            <i data-lucide="sun"></i>
+            <span>Solar Technology</span>
+          </a>
+        </nav>
+
+        <!-- Mobile Quick Actions -->
+        <div class="mobile-actions-grid">
+          <button class="mobile-action-card" id="mobile-auth-trigger">
+            <i data-lucide="user"></i>
+            <span id="mobile-auth-label">Sign In / Account</span>
+          </button>
+          <button class="mobile-action-card" id="mobile-wishlist-trigger">
+            <i data-lucide="heart"></i>
+            <span>Wishlist (<span id="mobile-wishlist-count">0</span>)</span>
+          </button>
+          <button class="mobile-action-card" id="mobile-orders-trigger">
+            <i data-lucide="package"></i>
+            <span>Track Orders</span>
+          </button>
+          <button class="mobile-action-card" id="mobile-faq-trigger">
+            <i data-lucide="help-circle"></i>
+            <span>Solar FAQ</span>
+          </button>
+        </div>
       </div>
     </div>
   </header>
