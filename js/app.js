@@ -911,14 +911,14 @@ class App {
               </ul>
             </div>
 
-            <!-- Actions: Add to Cart + Buy Now with PayPal -->
+            <!-- Actions: Add to Cart + Instant Checkout -->
             <div style="display: flex; flex-direction: column; gap: 0.6rem; margin-top: 1.5rem;">
               <button class="btn-primary-gold" onclick="window.app.addModalItemToCart('${product.id}')" style="justify-content: center; padding: 0.9rem;">
                 <i data-lucide="shopping-bag"></i> Add to Garden Basket
               </button>
-              <button class="btn-paypal" onclick="window.app.buyNowWithPayPal('${product.id}')">
+              <button class="btn-paypal" onclick="window.app.buyNowWithPayPal('${product.id}')" style="justify-content: center; padding: 0.85rem;">
                 <img src="https://www.paypalobjects.com/webstatic/icon/pp258.png" alt="PayPal" class="paypal-btn-icon">
-                <span>Buy Now with PayPal</span>
+                <span>Instant Checkout • Shopify & PayPal</span>
               </button>
             </div>
           </div>
@@ -1086,22 +1086,33 @@ class App {
     const select = document.getElementById('modal-variant-select');
     const selectedColor = select ? select.value : (product?.variants?.colors?.[0] || null);
 
-    if (product && window.cart && window.checkoutManager) {
+    if (product) {
       const activeSize = product.variants?.sizes ? (product.variants.sizes.find(s => s.id === this.modalSelectedSizeId) || product.variants.sizes[0]) : null;
+      const sizeId = activeSize ? activeSize.id : this.modalSelectedSizeId;
       const sizeLabel = activeSize ? `${activeSize.label} (${activeSize.dimension})` : null;
       const sizeImage = activeSize ? activeSize.image : product.image;
 
       const comboQty = this.modalSelectedComboQty || 1;
       const comboDetails = this.getComboDetails(product, comboQty, this.modalSelectedSizeId);
 
-      if (comboQty > 1) {
-        window.cart.addItem(product, 1, selectedColor, sizeLabel, comboDetails.discountedTotal, sizeImage, comboDetails);
-      } else {
-        window.cart.addItem(product, 1, selectedColor, sizeLabel, activeSize ? activeSize.price : product.price, sizeImage);
+      // Add to local cart for tracking
+      if (window.cart) {
+        if (comboQty > 1) {
+          window.cart.addItem(product, 1, selectedColor, sizeLabel, comboDetails.discountedTotal, sizeImage, comboDetails);
+        } else {
+          window.cart.addItem(product, 1, selectedColor, sizeLabel, activeSize ? activeSize.price : product.price, sizeImage);
+        }
       }
+
       this.closeProductModal();
-      window.checkoutManager.openCheckout(2); // Jump directly to PayPal Step
-      this.showToast('Initiating PayPal Express Checkout...', 'info');
+
+      if (window.shopifyIntegration) {
+        this.showToast('Redirecting to Shopify & CJ checkout...', 'info');
+        window.shopifyIntegration.buyNow(id, sizeId, comboQty);
+      } else if (window.checkoutManager) {
+        window.checkoutManager.openCheckout(2);
+        this.showToast('Initiating PayPal Express Checkout...', 'info');
+      }
     }
   }
 

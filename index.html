@@ -618,8 +618,23 @@
         <div class="hidden" id="step-2-panel">
           <h4 style="margin-bottom: 0.4rem; color: var(--deep-forest);">Choose Payment Method</h4>
           <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.2rem;">
-            Pay securely with your PayPal account or directly using any Debit / Credit Card (Visa, MasterCard, Amex, Discover).
+            Complete your order with verified Shopify & CJ Dropshipping checkout, or pay directly via PayPal.
           </p>
+
+          <!-- Shopify & CJ Dropshipping Primary Checkout CTA -->
+          <div style="margin-bottom: 1.25rem;">
+            <button type="button" class="btn-primary-gold" id="shopify-checkout-btn" style="width: 100%; justify-content: center; padding: 0.95rem; font-size: 0.95rem; border-radius: 8px;">
+              <i data-lucide="shopping-bag" style="width: 18px; height: 18px;"></i>
+              <span>Pay with Shopify & CJ Fulfillment</span>
+              <i data-lucide="arrow-right" style="width: 18px; height: 18px;"></i>
+            </button>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.45rem; font-size: 0.75rem; color: var(--text-muted); padding: 0 0.2rem;">
+              <span><i data-lucide="truck" style="width: 12px; height: 12px; vertical-align: middle;"></i> CJ Global Delivery</span>
+              <span><i data-lucide="shield-check" style="width: 12px; height: 12px; vertical-align: middle;"></i> 256-Bit SSL Checkout</span>
+            </div>
+          </div>
+
+          <div class="or-divider" style="margin: 1.1rem 0;"><span>OR PAY WITH PAYPAL BELOW</span></div>
 
           <!-- PayPal Payment Option -->
           <div class="pay-method-content active" id="pay-paypal-content">
@@ -1215,6 +1230,7 @@
   <script src="js/products.js"></script>
   <script src="js/reviews.js"></script>
   <script src="js/auth.js"></script>
+  <script src="js/shopify.js"></script>
   <script src="js/cart.js"></script>
   <script src="js/checkout.js"></script>
   <script src="js/orders.js"></script>

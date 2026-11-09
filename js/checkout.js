@@ -42,9 +42,27 @@ class CheckoutManager {
     document.getElementById('to-step-2')?.addEventListener('click', () => this.goToStep(2));
     document.getElementById('back-to-step-1')?.addEventListener('click', () => this.goToStep(1));
 
+    // Shopify & CJ Dropshipping Direct Checkout Trigger
+    document.getElementById('shopify-checkout-btn')?.addEventListener('click', () => {
+      const customer = {
+        name: document.getElementById('cust-name')?.value || '',
+        email: document.getElementById('cust-email')?.value || '',
+        address: document.getElementById('cust-addr')?.value || '',
+        city: document.getElementById('cust-city')?.value || '',
+        zip: document.getElementById('cust-zip')?.value || ''
+      };
+      if (window.shopifyIntegration && window.cart && window.cart.cart.length > 0) {
+        window.shopifyIntegration.proceedToCheckout(window.cart.cart, customer);
+      }
+    });
+
     // PayPal Express Checkout Trigger from Cart Drawer
     document.getElementById('cart-paypal-express-btn')?.addEventListener('click', () => {
-      this.openCheckout(2); // Jump directly to Payment Step with PayPal active
+      if (window.shopifyIntegration && window.cart && window.cart.cart.length > 0) {
+        window.shopifyIntegration.proceedToCheckout(window.cart.cart);
+      } else {
+        this.openCheckout(2); // Jump directly to Payment Step with PayPal active
+      }
     });
 
     // Close on overlay backdrop clicks

@@ -1,0 +1,84 @@
+Handle,Title,Body (HTML),Vendor,Product Category,Type,Tags,Published,Option1 Name,Option1 Value,Option2 Name,Option2 Value,Option3 Name,Option3 Value,Variant SKU,Variant Grams,Variant Inventory Tracker,Variant Inventory Qty,Variant Inventory Policy,Variant Fulfillment Service,Variant Price,Variant Compare At Price,Variant Requires Shipping,Variant Taxable,Variant Barcode,Image Src,Image Position,Image Alt Text,Gift Card,SEO Title,SEO Description,Status
+the-zen-pavilion-hanging-solar-lantern,The Zen Pavilion Hanging Solar Lantern,"<p>Handcrafted from seasoned organic Moso bamboo weave with a weather-treated hanging rope and integrated solar lid. Delivers up to 14 hours of warm amber twilight illumination across verandas, garden branches, dining pergolas, and patios — with zero wiring and zero electricity costs.</p>
+<h3>Key Features:</h3>
+<ul>
+  <li>Choice of 2 Artisanal Silhouettes: Small Cylinder (22cm &times; 16cm) or Large Teardrop Urn (24cm &times; 20cm)</li>
+  <li>Interwoven Natural Honey Moso Bamboo with weather-sealed UV protection</li>
+  <li>High-Efficiency Monocrystalline Solar Top Lid with Frosted Candle Diffuser</li>
+  <li>2200K Warm Candlelight Amber Glow with Automated Dusk-to-Dawn Optical Sensor</li>
+  <li>IP65 Marine-Grade Weatherproof: Resists heavy rain, frost, and intense sun</li>
+</ul>
+<h3>Solar Specifications:</h3>
+<ul>
+  <li><strong>Solar Collector:</strong> 22% High-Conversion Monocrystalline Silicon</li>
+  <li><strong>Battery:</strong> 2200mAh LiFePO4 All-Weather Rechargeable Cell</li>
+  <li><strong>Runtime:</strong> 12 - 14 Hours after full solar charge</li>
+  <li><strong>Light Output:</strong> 85 Lumens (Warm Amber Flickering Candlelight)</li>
+  <li><strong>Waterproof Rating:</strong> IP65 Outdoor Weather-Sealed</li>
+</ul>",BAMBOOLUME,Home & Garden > Lighting > Lamps,Solar Lanterns,"Hanging Lantern, Solar Lighting, Bamboo Decor, Patio Lighting, Eco-Friendly",TRUE,Silhouette & Size,Small Cylinder (22cm x 16cm),,,,,BAM-ZEN-SM,1100,shopify,25,continue,manual,67.99,89.99,TRUE,FALSE,,https://ogvinay.github.io/bamboolume/assets/bamboo_hanging_patio_primary.jpg,1,The Zen Pavilion Hanging Solar Lantern on Patio Tree,FALSE,The Zen Pavilion Hanging Solar Lantern | BAMBOOLUME,Handcrafted organic Moso bamboo hanging solar lantern with 14hr dusk-to-dawn runtime.,active
+the-zen-pavilion-hanging-solar-lantern,,,,,,,,Silhouette & Size,Large Teardrop Urn (24cm x 20cm),,,,,BAM-ZEN-LG,1450,shopify,20,continue,manual,109.99,139.99,TRUE,FALSE,,https://ogvinay.github.io/bamboolume/assets/bamboo_hanging_large_24cm.jpg,2,Large Teardrop Urn Hanging Bamboo Lantern,,,,
+the-zen-pavilion-hanging-solar-lantern,,,,,,,,,,,,,,,,,,,,,,,,,https://ogvinay.github.io/bamboolume/assets/bamboo_hanging_dining_canopy.jpg,3,The Zen Pavilion Hanging Solar Lantern Gallery,,,,
+the-zen-pavilion-hanging-solar-lantern,,,,,,,,,,,,,,,,,,,,,,,,,https://ogvinay.github.io/bamboolume/assets/bamboo_hanging_small_22cm.jpg,4,The Zen Pavilion Hanging Solar Lantern Gallery,,,,
+the-zen-pavilion-hanging-solar-lantern,,,,,,,,,,,,,,,,,,,,,,,,,https://ogvinay.github.io/bamboolume/assets/bamboo_hanging_lantern.jpg,5,The Zen Pavilion Hanging Solar Lantern Gallery,,,,
+the-kyoto-kadomatsu-bamboo-stalk-solar,The Kyoto Kadomatsu Bamboo Stalk Solar Lantern,"<p>Inspired by traditional Japanese Kadomatsu bamboo artistry, crafted from authentic solid Moso bamboo stalks with an iconic diagonal top cut. An internal 2200K solar candle illuminates the interior of the culm, casting an enchanting warm beacon along garden pathways, rockeries, and stone verandas.</p>
+<h3>Key Features:</h3>
+<ul>
+  <li>Authentic Solid Moso Bamboo Culm with Traditional Diagonal Kadomatsu Cut</li>
+  <li>Available in 3 Heights (30cm, 40cm, 50cm) or as a Complete 3-Stalk Garden Cluster</li>
+  <li>Standardized 9.5cm Outer Culm Diameter with Weather-Sealed Ground Base</li>
+  <li>Internal 2200K Golden Candlelight illuminates the inner hollow stalk</li>
+  <li>Concealed Top-Mounted Solar Collector with All-Weather LiFePO4 Battery</li>
+</ul>
+<h3>Solar Specifications:</h3>
+<ul>
+  <li><strong>Solar Panel:</strong> 2.2W Concealed Monocrystalline Collector</li>
+  <li><strong>Battery:</strong> 2200mAh High-Cycle LiFePO4 Battery</li>
+  <li><strong>Runtime:</strong> 12 - 14 Hours Dusk-to-Dawn</li>
+  <li><strong>Light Output:</strong> 80 Lumens (Warm Amber Glow)</li>
+  <li><strong>Weather Resistance:</strong> IP65 Marine Outdoor Waterproof</li>
+</ul>",BAMBOOLUME,Home & Garden > Lighting > Landscape Pathway,Solar Pathway Lights,"Pathway Lighting, Lawn Decor, Zen Garden, Bamboo Stalk, Solar Ground Light",TRUE,Culm Size,Small (30cm x 9.5cm),,,,,BAM-KAD-30,1800,shopify,20,continue,manual,117.99,149.99,TRUE,FALSE,,https://ogvinay.github.io/bamboolume/assets/bamboo_stalk_small_30cm.jpg,1,The Kyoto Kadomatsu Bamboo Stalk Solar Lantern - Small (30cm x 9.5cm),FALSE,The Kyoto Kadomatsu Bamboo Stalk Solar Lantern | BAMBOOLUME,Authentic Kadomatsu diagonal-cut solid Moso bamboo solar garden stalk lantern.,active
+the-kyoto-kadomatsu-bamboo-stalk-solar,,,,,,,,,Medium (40cm x 9.5cm),,,,,BAM-KAD-40,1800,shopify,20,continue,manual,143.99,179.99,TRUE,FALSE,,https://ogvinay.github.io/bamboolume/assets/bamboo_stalk_medium_40cm.jpg,2,The Kyoto Kadomatsu Bamboo Stalk Solar Lantern - Medium (40cm x 9.5cm),,,,
+the-kyoto-kadomatsu-bamboo-stalk-solar,,,,,,,,,Large (50cm x 9.5cm),,,,,BAM-KAD-50,1800,shopify,20,continue,manual,188.99,229.99,TRUE,FALSE,,https://ogvinay.github.io/bamboolume/assets/bamboo_stalk_large_50cm.jpg,3,The Kyoto Kadomatsu Bamboo Stalk Solar Lantern - Large (50cm x 9.5cm),,,,
+the-kyoto-kadomatsu-bamboo-stalk-solar,,,,,,,,,Complete Harmonious Trio Set,,,,,BAM-KAD-TRIO,1800,shopify,20,continue,manual,383.78,450.97,TRUE,FALSE,,https://ogvinay.github.io/bamboolume/assets/bamboo_kadomatsu_trio.jpg,4,The Kyoto Kadomatsu Bamboo Stalk Solar Lantern - Complete Harmonious Trio Set,,,,
+the-kyoto-kadomatsu-bamboo-stalk-solar,,,,,,,,,,,,,,,,,,,,,,,,,https://ogvinay.github.io/bamboolume/assets/bamboo_kadomatsu_pathway_primary.jpg,5,The Kyoto Kadomatsu Pathway Primary View,,,,
+the-riviera-terrace-honeycomb-tabletop-solar-lantern,The Riviera Terrace Honeycomb Tabletop Solar Lantern,"<p>An artisan open-weave bamboo lattice lantern designed for al fresco dinner tables, terrace credenzas, poolside lounges, and balcony railings. Projects mesmerizing geometric honeycomb shadow patterns across table linens and evening gathering spaces.</p>
+<h3>Key Features:</h3>
+<ul>
+  <li>Intricate Open-Lattice Honeycomb Bamboo Weave casting dynamic diamond shadows</li>
+  <li>Natural Rope Carrying Handle with Weighted Solid Teak Rim for tabletop stability</li>
+  <li>3-Stage Touch Dimmer: Ambient Glow (30%), Evening Dining (70%), Full Radiance (100%)</li>
+  <li>Concealed Top-Mounted Solar Disc charging automatically during daylight</li>
+  <li>Eco-friendly, chemical-free organic bamboo construction</li>
+</ul>
+<h3>Solar Specifications:</h3>
+<ul>
+  <li><strong>Solar Disc:</strong> 3.0W Monocrystalline Fast-Charge Solar Collector</li>
+  <li><strong>Battery:</strong> 3200mAh Extended Reserve LiFePO4 Cell</li>
+  <li><strong>Runtime:</strong> 14 - 16 Hours continuous light</li>
+  <li><strong>Light Output:</strong> 120 Lumens Dynamic Shadow Projection</li>
+  <li><strong>Color Temperature:</strong> 2400K Warm Sunset Amber</li>
+  <li><strong>Water Resistance:</strong> IP65 Splash &amp; Rainproof</li>
+</ul>",BAMBOOLUME,Home & Garden > Lighting > Lamps,Tabletop Solar Lanterns,"Tabletop Lantern, Terrace Lighting, Dining Lantern, Shadow Projection, Honeycomb",TRUE,Color Finish,Natural Golden Bamboo,,,,,BAM-RIV-GLD,950,shopify,30,continue,manual,64.99,84.99,TRUE,FALSE,,https://ogvinay.github.io/bamboolume/assets/bamboo_terrace_shadow_primary.jpg,1,The Riviera Terrace Honeycomb Tabletop Solar Lantern in Natural Golden Bamboo,FALSE,The Riviera Terrace Honeycomb Tabletop Solar Lantern | BAMBOOLUME,Artisan honeycomb bamboo lattice tabletop solar lantern projecting geometric shadows.,active
+the-riviera-terrace-honeycomb-tabletop-solar-lantern,,,,,,,,,Sun-Bleached Sand,,,,,BAM-RIV-SND,950,shopify,30,continue,manual,64.99,84.99,TRUE,FALSE,,https://ogvinay.github.io/bamboolume/assets/bamboo_terrace_dining_patio.jpg,2,The Riviera Terrace Honeycomb Tabletop Solar Lantern in Sun-Bleached Sand,,,,
+the-riviera-terrace-honeycomb-tabletop-solar-lantern,,,,,,,,,Deep Espresso,,,,,BAM-RIV-ESP,950,shopify,30,continue,manual,64.99,84.99,TRUE,FALSE,,https://ogvinay.github.io/bamboolume/assets/bamboo_terrace_tabletop.jpg,3,The Riviera Terrace Honeycomb Tabletop Solar Lantern in Deep Espresso,,,,
+the-taketora-patio-tripod-solar-floor-lantern,The Taketora Patio Tripod Solar Floor Lantern,"<p>An architectural 58cm freestanding solar floor lantern elevated on slender matte-black metal tripod legs. Vertical slender bamboo cane reeds encircle an internal warm amber candle, projecting 360-degree radial light beams across outdoor decks, stone patios, and living areas.</p>
+<h3>Key Features:</h3>
+<ul>
+  <li>Impressive 58cm Standing Height with 22cm Stable Base and Non-Slip Rubber Feet</li>
+  <li>Slender Natural Bamboo Canes casting 360-degree radial shadow beams</li>
+  <li>Powder-Coated Matte Black Rust-Resistant Metal Tripod Frame</li>
+  <li>Edison-Style Amber Filament LED with Automated Dusk-to-Dawn Optical Twilight Sensor</li>
+  <li>IP65 Marine Heavy-Duty Weatherproofing for year-round outdoor display</li>
+</ul>
+<h3>Solar Specifications:</h3>
+<ul>
+  <li><strong>Solar Disc:</strong> 3.5W Top-Mounted Monocrystalline Collector</li>
+  <li><strong>Battery:</strong> 3400mAh High-Capacity LiFePO4 Cell</li>
+  <li><strong>Runtime:</strong> 14 - 16 Hours</li>
+  <li><strong>Brightness:</strong> 135 Lumens (360&deg; Radial Slat Projection)</li>
+  <li><strong>Color Temperature:</strong> 2200K Vintage Candlelight</li>
+  <li><strong>Weather Resistance:</strong> IP65 Weather-Sealed</li>
+</ul>",BAMBOOLUME,Home & Garden > Lighting > Lamps,Floor Solar Lanterns,"Floor Lantern, Tripod Lamp, Patio Furniture, Standing Solar Light, Architectural",TRUE,Color Finish,Natural Blonde Bamboo,,,,,BAM-TAK-BLD,2400,shopify,15,continue,manual,96.99,129.99,TRUE,FALSE,,https://ogvinay.github.io/bamboolume/assets/bamboo_floor_tower_primary.jpg,1,The Taketora Patio Tripod Solar Floor Lantern in Natural Blonde Bamboo,FALSE,The Taketora Patio Tripod Solar Floor Lantern | BAMBOOLUME,Freestanding 58cm architectural tripod bamboo solar floor lantern with 360-degree radial beams.,active
+the-taketora-patio-tripod-solar-floor-lantern,,,,,,,,,Caramel Smoked Bamboo,,,,,BAM-TAK-CAR,2400,shopify,15,continue,manual,96.99,129.99,TRUE,FALSE,,https://ogvinay.github.io/bamboolume/assets/bamboo_floor_tower_dining_patio.jpg,2,The Taketora Patio Tripod Solar Floor Lantern in Caramel Smoked Bamboo,,,,
+the-taketora-patio-tripod-solar-floor-lantern,,,,,,,,,Weathered Driftwood,,,,,BAM-TAK-WTH,2400,shopify,15,continue,manual,96.99,129.99,TRUE,FALSE,,https://ogvinay.github.io/bamboolume/assets/bamboo_floor_tower_night.jpg,3,The Taketora Patio Tripod Solar Floor Lantern in Weathered Driftwood,,,,
+the-taketora-patio-tripod-solar-floor-lantern,,,,,,,,,,,,,,,,,,,,,,,,,https://ogvinay.github.io/bamboolume/assets/bamboo_floor_tower_dimensions.jpg,4,Taketora Dimensions and Specs,,,,
