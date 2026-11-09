@@ -39,7 +39,14 @@ class CheckoutManager {
     document.getElementById('close-checkout-btn')?.addEventListener('click', () => this.closeCheckout());
 
     // Navigation buttons
-    document.getElementById('to-step-2')?.addEventListener('click', () => this.goToStep(2));
+    document.getElementById('to-step-2')?.addEventListener('click', () => {
+      const form = document.getElementById('step-1-form');
+      if (form && !form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+      this.goToStep(2);
+    });
     document.getElementById('back-to-step-1')?.addEventListener('click', () => this.goToStep(1));
 
     // Shopify & CJ Dropshipping Direct Checkout Trigger
@@ -304,10 +311,13 @@ class CheckoutManager {
 
         const randomTxId = `PAYID-${Math.random().toString(36).substring(2, 7).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
 
+        const enteredName = document.getElementById('cust-name')?.value || 'Valued Customer';
+        const enteredEmail = document.getElementById('cust-email')?.value || 'customer@bamboolume.com';
+
         this.completePayPalOrder({
           transactionId: randomTxId,
-          payerName: 'Vinay Kumar',
-          payerEmail: 'vinay.buyer@sandbox.paypal.com',
+          payerName: enteredName,
+          payerEmail: enteredEmail,
           method: methodMap[this.simSelectedSource] || 'PayPal Express'
         });
       }, 1400);
@@ -393,26 +403,6 @@ class CheckoutManager {
     const { total } = window.cart.getTotals();
     const finalAmtEl = document.getElementById('checkout-final-amount');
     if (finalAmtEl) finalAmtEl.textContent = `$${total.toFixed(2)}`;
-
-    // Autofill from logged-in user profile if available
-    if (window.authManager && window.authManager.currentUser) {
-      const u = window.authManager.currentUser;
-      const nameInput = document.getElementById('cust-name');
-      const emailInput = document.getElementById('cust-email');
-      const addrInput = document.getElementById('cust-addr');
-      const cityInput = document.getElementById('cust-city');
-      const zipInput = document.getElementById('cust-zip');
-
-      if (nameInput && u.name) nameInput.value = u.name;
-      if (emailInput && u.email) emailInput.value = u.email;
-
-      if (u.savedAddresses && u.savedAddresses.length > 0) {
-        const prim = u.savedAddresses[0];
-        if (addrInput && prim.address) addrInput.value = prim.address;
-        if (cityInput && prim.city) cityInput.value = prim.city;
-        if (zipInput && prim.zip) zipInput.value = prim.zip;
-      }
-    }
 
     if (startAtStep === 2) {
       this.setPaymentMethod('paypal');
