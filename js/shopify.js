@@ -10,12 +10,29 @@ class ShopifyIntegration {
     this.storefrontToken = '66bacc09149b1266c889f8371962cdbe';
     this.graphqlEndpoint = `https://${this.storeDomain}/api/2024-01/graphql.json`;
 
-    // Live Product & Variant mappings from Shopify & CJ Dropshipping
+    // Live Product & Variant mappings connected from Shopify & CJ Dropshipping
     this.variantMap = {
+      // 1. The Zen Pavilion Hanging Solar Lantern (Shopify Product ID: 10370472837218)
       'lantern-1': {
-        'small-cylinder': '50921580494946', // Bamboo Lantern (Small 22cm)
-        'large-teardrop': '50921580527714', // Bamboo Lantern Spherical (Large 24cm)
+        'small-cylinder': '50921580494946', // Bamboo Lantern (Small 22cm) - SKU: CJYD247340301AZ
+        'large-teardrop': '50921580527714', // Bamboo Lantern Spherical (Large 24cm) - SKU: CJYD247340302BY
         'default': '50921580494946'
+      },
+      // 2. The Kyoto Kadomatsu Bamboo Stalk Solar (Shopify Product ID: 10372417192034)
+      'lantern-2': {
+        'small': '50933592162402',  // Power Connection Height 30CM - SKU: CJYD186467001AZ
+        'medium': '50933592195170', // Power Connection Height 40CM - SKU: CJYD186467002BY
+        'large': '50933592227938',  // Power Connection Height 50CM - SKU: CJYD186467003CX
+        'trio': ['50933592162402', '50933592195170', '50933592227938'], // Complete Trio Set (all 3 stalks)
+        'default': '50933592162402'
+      },
+      // 3. The Riviera Terrace Honeycomb Tabletop Solar Lantern (Shopify Product ID: 10372464541794)
+      'lantern-3': {
+        'default': '50933936324706' // Style 1 - SKU: CJYD202529501AZ
+      },
+      // 4. The Taketora Patio Tripod Solar Floor Lantern (Shopify Product ID: 10372464541794)
+      'lantern-4': {
+        'default': '50933936357474' // Style 3 - SKU: CJYD202529503CX
       }
     };
 
@@ -32,12 +49,29 @@ class ShopifyIntegration {
 
     if (sizeId) {
       const lower = sizeId.toLowerCase();
-      if (lower.includes('large') || lower.includes('teardrop') || lower.includes('spherical')) {
+
+      // lantern-1 (Zen Pavilion Hanging)
+      if (lower.includes('large-teardrop') || lower.includes('teardrop') || lower.includes('spherical') || lower.includes('24cm')) {
         return product['large-teardrop'] || product.default;
       }
-      if (lower.includes('small') || lower.includes('cylinder')) {
+      if (lower.includes('small-cylinder') || lower.includes('cylinder') || lower.includes('22cm')) {
         return product['small-cylinder'] || product.default;
       }
+
+      // lantern-2 (Kyoto Kadomatsu Stalks)
+      if (lower.includes('trio') || lower.includes('complete')) {
+        return product['trio'] || product.default;
+      }
+      if (lower.includes('50cm') || lower === 'large' || lower.includes('large (50cm')) {
+        return product['large'] || product.default;
+      }
+      if (lower.includes('40cm') || lower === 'medium' || lower.includes('medium (40cm')) {
+        return product['medium'] || product.default;
+      }
+      if (lower.includes('30cm') || lower === 'small' || lower.includes('small (30cm')) {
+        return product['small'] || product.default;
+      }
+
       if (product[sizeId]) return product[sizeId];
     }
 
@@ -51,11 +85,20 @@ class ShopifyIntegration {
   buildCartPermalink(cartItems, customer = null) {
     if (!cartItems || cartItems.length === 0) return null;
 
-    const parts = cartItems.map(item => {
+    const parts = [];
+    cartItems.forEach(item => {
       const sizeId = item.selectedSize || (item.variants?.sizes?.[0]?.id) || null;
-      const variantId = this.getVariantId(item.id, sizeId);
+      const variantResolution = this.getVariantId(item.id, sizeId);
       const qty = item.comboInfo && item.comboInfo.qty ? (item.comboInfo.qty * item.quantity) : item.quantity;
-      return `${variantId}:${qty}`;
+      
+      if (Array.isArray(variantResolution)) {
+        // Multi-variant bundle (e.g. Trio Set contains 1 of each stalk size)
+        variantResolution.forEach(vId => {
+          parts.push(`${vId}:${qty}`);
+        });
+      } else {
+        parts.push(`${variantResolution}:${qty}`);
+      }
     });
 
     let checkoutUrl = `https://${this.storeDomain}/cart/${parts.join(',')}`;
@@ -88,8 +131,14 @@ class ShopifyIntegration {
    * Instant 1-Click Buy Now for a specific product and size
    */
   buyNow(productId, sizeId, quantity = 1) {
-    const variantId = this.getVariantId(productId, sizeId);
-    const url = `https://${this.storeDomain}/cart/${variantId}:${quantity}`;
+    const variantResolution = this.getVariantId(productId, sizeId);
+    let parts;
+    if (Array.isArray(variantResolution)) {
+      parts = variantResolution.map(vId => `${vId}:${quantity}`).join(',');
+    } else {
+      parts = `${variantResolution}:${quantity}`;
+    }
+    const url = `https://${this.storeDomain}/cart/${parts}`;
     window.location.href = url;
   }
 
@@ -99,14 +148,25 @@ class ShopifyIntegration {
   async createStorefrontCheckout(cartItems) {
     if (!cartItems || cartItems.length === 0) return null;
 
-    const lines = cartItems.map(item => {
+    const lines = [];
+    cartItems.forEach(item => {
       const sizeId = item.selectedSize || null;
-      const variantId = this.getVariantId(item.id, sizeId);
+      const variantResolution = this.getVariantId(item.id, sizeId);
       const qty = item.comboInfo && item.comboInfo.qty ? (item.comboInfo.qty * item.quantity) : item.quantity;
-      return {
-        merchandiseId: `gid://shopify/ProductVariant/${variantId}`,
-        quantity: Number(qty)
-      };
+      
+      if (Array.isArray(variantResolution)) {
+        variantResolution.forEach(vId => {
+          lines.push({
+            merchandiseId: `gid://shopify/ProductVariant/${vId}`,
+            quantity: Number(qty)
+          });
+        });
+      } else {
+        lines.push({
+          merchandiseId: `gid://shopify/ProductVariant/${variantResolution}`,
+          quantity: Number(qty)
+        });
+      }
     });
 
     const mutation = `
