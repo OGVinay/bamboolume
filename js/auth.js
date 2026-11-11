@@ -13,29 +13,7 @@ class AuthManager {
 
   initUsersDb() {
     if (!localStorage.getItem(this.usersDbKey)) {
-      const defaultUsers = [
-        {
-          name: 'Vinay Kumar',
-          email: 'vinay@bamboolume.com',
-          password: 'Password123!',
-          memberSince: 'March 2026',
-          tier: 'Botanical Connoisseur (VIP)',
-          rewardPoints: 480,
-          savedAddresses: [
-            {
-              id: 'addr-1',
-              label: 'Garden Residence (Primary)',
-              fullName: 'Vinay Kumar',
-              address: '742 Evergreen Terrace, Suite 4B',
-              city: 'Seattle',
-              state: 'WA',
-              zip: '98101',
-              country: 'United States'
-            }
-          ]
-        }
-      ];
-      localStorage.setItem(this.usersDbKey, JSON.stringify(defaultUsers));
+      localStorage.setItem(this.usersDbKey, JSON.stringify([]));
     }
   }
 
@@ -164,11 +142,6 @@ class AuthManager {
       this.handleForgotPassword();
     });
 
-    // 1-Click Demo Login Button
-    document.getElementById('demo-login-btn')?.addEventListener('click', () => {
-      this.demoLogin();
-    });
-
     // Forgot Password Link in Signin
     document.getElementById('switch-to-forgot')?.addEventListener('click', (e) => {
       e.preventDefault();
@@ -276,7 +249,7 @@ class AuthManager {
     const user = users.find(u => u.email.toLowerCase() === email);
 
     if (!user || user.password !== password) {
-      window.showToast('Invalid email or password. Try the 1-Click Demo Sign In!', 'info');
+      window.showToast('Invalid email or password. Please check your credentials or create an account.', 'info');
       return;
     }
 
@@ -327,34 +300,7 @@ class AuthManager {
     this.saveSession(newUser);
     this.closeAuthModal();
 
-    window.showToast(`Welcome to Bamboolume, ${name}! $15 Welcome credit added.`, 'success');
-  }
-
-  demoLogin() {
-    const users = this.getUsersDb();
-    const demoUser = users.find(u => u.email === 'vinay@bamboolume.com') || {
-      name: 'Vinay Kumar',
-      email: 'vinay@bamboolume.com',
-      memberSince: 'March 2026',
-      tier: 'Botanical Connoisseur (VIP)',
-      rewardPoints: 480,
-      savedAddresses: [
-        {
-          id: 'addr-1',
-          label: 'Garden Residence (Primary)',
-          fullName: 'Vinay Kumar',
-          address: '742 Evergreen Terrace, Suite 4B',
-          city: 'Seattle',
-          state: 'WA',
-          zip: '98101',
-          country: 'United States'
-        }
-      ]
-    };
-
-    this.saveSession(demoUser);
-    this.closeAuthModal();
-    window.showToast('Signed in as Vinay Kumar (Botanical VIP)!', 'success');
+    window.showToast(`Welcome to Bamboolume, ${name}!`, 'success');
   }
 
   handleForgotPassword() {
@@ -370,12 +316,12 @@ class AuthManager {
       statusEl.innerHTML = `
         <div style="background: rgba(72,107,69,0.12); border: 1px solid var(--bamboo-green); padding: 0.8rem; border-radius: 8px; color: var(--deep-forest); font-size: 0.85rem;">
           <i data-lucide="check-circle" style="color: var(--bamboo-green); width: 16px; height: 16px; vertical-align: middle;"></i>
-          <strong>Password Reset Sent:</strong> A secure reset link has been dispatched to <strong>${email}</strong>. For instant demo testing, you may use password: <code>Password123!</code>
+          <strong>Reset Requested:</strong> If an account exists for <strong>${email}</strong> on this browser, please create a new profile or sign in with your registered password.
         </div>
       `;
       if (window.lucide) window.lucide.createIcons();
     }
-    window.showToast(`Reset instructions sent to ${email}`, 'success');
+    window.showToast(`Password help checked for ${email}`, 'info');
   }
 
   logout() {

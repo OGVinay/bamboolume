@@ -559,7 +559,7 @@
       <div class="checkout-header">
         <div>
           <h3>BAMBOOLUME Checkout</h3>
-          <span style="font-size: 0.78rem; color: var(--soft-sage);">256-bit SSL Encrypted • PayPal Verified</span>
+          <span style="font-size: 0.78rem; color: var(--soft-sage);">256-bit SSL Encrypted • Official Shopify Checkout</span>
         </div>
         <button class="drawer-close-btn" id="close-checkout-btn"><i data-lucide="x"></i></button>
       </div>
@@ -614,64 +614,44 @@
           </div>
         </form>
 
-        <!-- STEP 2: Secure Payment Gateway (PayPal & Cards) -->
+        <!-- STEP 2: Official Shopify & CJ Dropshipping Payment Handoff -->
         <div class="hidden" id="step-2-panel">
-          <h4 style="margin-bottom: 0.4rem; color: var(--deep-forest);">Choose Payment Method</h4>
+          <h4 style="margin-bottom: 0.4rem; color: var(--deep-forest);">Complete Payment Safely on Shopify</h4>
           <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.2rem;">
-            Complete your order with verified Shopify & CJ Dropshipping checkout, or pay directly via PayPal.
+            Your shipping details and basket items transfer directly into Shopify's encrypted checkout, supporting Cards, PayPal, and automatic CJ Dropshipping tracking.
           </p>
 
-          <!-- Shopify & CJ Dropshipping Primary Checkout CTA -->
-          <div style="margin-bottom: 1.25rem;">
-            <button type="button" class="btn-primary-gold" id="shopify-checkout-btn" style="width: 100%; justify-content: center; padding: 0.95rem; font-size: 0.95rem; border-radius: 8px;">
+          <div class="paypal-gateway-container" style="margin-bottom: 1.25rem;">
+            <div class="paypal-header-card">
+              <div class="paypal-brand-info">
+                <div class="paypal-logo-badge">
+                  <i data-lucide="shield-check" style="color: var(--deep-forest); width: 22px; height: 22px;"></i>
+                </div>
+                <div>
+                  <div class="paypal-brand-title">Official Shopify Checkout</div>
+                  <div class="paypal-brand-sub">PayPal • Visa • MasterCard • Amex • Pay in 4</div>
+                </div>
+              </div>
+              <div style="font-size: 0.72rem; color: var(--bamboo-green); background: rgba(72, 107, 69, 0.12); padding: 0.3rem 0.6rem; border-radius: 4px; font-weight: 600;">
+                <i data-lucide="lock" style="width: 12px; height: 12px; vertical-align: middle;"></i> 256-Bit SSL
+              </div>
+            </div>
+
+            <div class="paypal-pay-later-banner">
+              <i data-lucide="truck" style="color: var(--bamboo-green);"></i>
+              <span>Automatic fulfillment &amp; tracking notifications via <strong>Shopify &amp; CJ Dropshipping</strong>.</span>
+            </div>
+
+            <button type="button" class="btn-primary-gold" id="shopify-checkout-btn" style="width: 100%; justify-content: center; padding: 0.95rem; font-size: 0.95rem; border-radius: 8px; margin-top: 0.85rem;">
               <i data-lucide="shopping-bag" style="width: 18px; height: 18px;"></i>
-              <span>Pay with Shopify & CJ Fulfillment</span>
+              <span>Proceed to Official Shopify Checkout</span>
               <i data-lucide="arrow-right" style="width: 18px; height: 18px;"></i>
             </button>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.45rem; font-size: 0.75rem; color: var(--text-muted); padding: 0 0.2rem;">
-              <span><i data-lucide="truck" style="width: 12px; height: 12px; vertical-align: middle;"></i> CJ Global Delivery</span>
-              <span><i data-lucide="shield-check" style="width: 12px; height: 12px; vertical-align: middle;"></i> 256-Bit SSL Checkout</span>
-            </div>
-          </div>
-
-          <div class="or-divider" style="margin: 1.1rem 0;"><span>OR PAY WITH PAYPAL BELOW</span></div>
-
-          <!-- PayPal Payment Option -->
-          <div class="pay-method-content active" id="pay-paypal-content">
-            <div class="paypal-gateway-container">
-              <div class="paypal-header-card">
-                <div class="paypal-brand-info">
-                  <div class="paypal-logo-badge">
-                    <img src="https://www.paypalobjects.com/webstatic/mktg/Logo/pp-logo-100px.png" alt="PayPal Logo">
-                  </div>
-                  <div>
-                    <div class="paypal-brand-title">PayPal & Card Checkout</div>
-                    <div class="paypal-brand-sub">PayPal • Visa • MasterCard • Amex • Pay in 4</div>
-                  </div>
-                </div>
-                <div style="font-size: 0.72rem; color: #0070BA; background: rgba(0, 112, 186, 0.1); padding: 0.3rem 0.6rem; border-radius: 4px; font-weight: 600;">
-                  <i data-lucide="shield-check" style="width: 12px; height: 12px; vertical-align: middle;"></i> Verified Merchant
-                </div>
-              </div>
-
-              <div class="paypal-pay-later-banner">
-                <i data-lucide="shield-check" style="color: #0070BA;"></i>
-                <span>Eligible for <strong>Pay in 4</strong> interest-free installments or PayPal balance/cards.</span>
-              </div>
-
-              <!-- SDK Area -->
-              <div id="paypal-sdk-area">
-                <div id="paypal-button-container"></div>
-                <p style="text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 0.6rem;">
-                  <i data-lucide="lock" style="width: 12px; height: 12px; vertical-align: middle;"></i> 256-Bit SSL Encrypted • Official PayPal Merchant Checkout
-                </p>
-              </div>
-            </div>
           </div>
 
           <!-- Amount Banner -->
-          <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: var(--warm-cream); border-radius: var(--radius-md); margin-top: 1.5rem; border: 1px solid var(--border-color);">
-            <span style="font-weight: 600; color: var(--charcoal);">Total to Authorize:</span>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: var(--warm-cream); border-radius: var(--radius-md); margin-top: 1.25rem; border: 1px solid var(--border-color);">
+            <span style="font-weight: 600; color: var(--charcoal);">Estimated Total:</span>
             <strong id="checkout-final-amount" style="font-family: var(--font-serif); font-size: 1.4rem; color: var(--deep-forest);">$0.00</strong>
           </div>
 
@@ -689,9 +669,9 @@
               <i data-lucide="check" style="width: 32px; height: 32px;"></i>
             </div>
             <h2 style="font-size: 1.8rem; color: var(--deep-forest); margin-bottom: 0.4rem;">Order Placed Successfully!</h2>
-            <p style="font-size: 0.9rem; color: var(--charcoal);">Order ID: <strong id="success-order-id" style="color: var(--bamboo-gold);">#BL-98214</strong></p>
+            <p style="font-size: 0.9rem; color: var(--charcoal);">Order ID: <strong id="success-order-id" style="color: var(--bamboo-gold);">—</strong></p>
             <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.5rem;">
-              Confirmation sent to <span id="success-email" style="font-weight: 600;">vinay@bamboolume.com</span>.
+              Confirmation sent to <span id="success-email" style="font-weight: 600;">your email</span>.
             </p>
 
             <div style="background: var(--warm-cream); border: 1px solid var(--muted-gold); border-radius: var(--radius-md); padding: 1.5rem; text-align: left; margin-bottom: 1.5rem;">
@@ -705,7 +685,7 @@
               </div>
               <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.4rem;" id="receipt-transaction-row">
                 <span>PayPal Transaction ID</span>
-                <span id="receipt-transaction-id" style="font-family: monospace; font-weight: 700; color: #0070BA;">PAYID-SAMPLE</span>
+                <span id="receipt-transaction-id" style="font-family: monospace; font-weight: 700; color: #0070BA;">—</span>
               </div>
               <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.4rem;">
                 <span>Payment Status</span>
@@ -748,89 +728,6 @@
     </div>
   </div>
 
-  <!-- 11. PAYPAL SANDBOX INTERACTIVE SIMULATOR MODAL -->
-  <div class="modal-overlay hidden" id="paypal-sim-overlay" style="z-index: 10000;">
-    <div class="paypal-sim-dialog">
-      <div class="paypal-sim-header">
-        <div class="paypal-sim-header-logo">
-          <img src="https://www.paypalobjects.com/webstatic/mktg/Logo/pp-logo-100px.png" alt="PayPal">
-          <span class="paypal-sim-badge">SANDBOX SIMULATOR</span>
-        </div>
-        <button class="paypal-sim-close-btn" id="close-paypal-sim-btn"><i data-lucide="x"></i></button>
-      </div>
-
-      <div class="paypal-sim-body">
-        <div class="paypal-sim-user">
-          <div class="paypal-sim-avatar">V</div>
-          <div class="paypal-sim-user-info">
-            <h5>Vinay Kumar (Sandbox Account)</h5>
-            <span>vinay.buyer@sandbox.paypal.com • Buyer Protection Active</span>
-          </div>
-        </div>
-
-        <div class="paypal-sim-amount-card">
-          <div class="paypal-sim-amount-row">
-            <div>
-              <span style="font-size: 0.8rem; color: #6b7280; font-weight: 600;">Total Purchase</span>
-              <div style="font-size: 0.85rem; color: #111827;">BAMBOOLUME Outdoor Lighting</div>
-            </div>
-            <div class="paypal-sim-amount-val" id="paypal-sim-total">$0.00</div>
-          </div>
-        </div>
-
-        <div class="paypal-sim-method-select">
-          <label>Select Payment Source</label>
-          <div class="paypal-sim-method-option selected" data-source="balance" id="sim-opt-balance">
-            <div class="paypal-sim-method-details">
-              <i data-lucide="wallet" style="color: #0070BA;"></i>
-              <div>
-                <strong style="font-size: 0.9rem;">PayPal Balance</strong>
-                <div style="font-size: 0.75rem; color: #6b7280;">Available: $2,450.00 USD</div>
-              </div>
-            </div>
-            <i data-lucide="check-circle" style="color: #0070BA;"></i>
-          </div>
-
-          <div class="paypal-sim-method-option" data-source="paylater" id="sim-opt-paylater">
-            <div class="paypal-sim-method-details">
-              <i data-lucide="calendar" style="color: #0070BA;"></i>
-              <div>
-                <strong style="font-size: 0.9rem;">Pay in 4 (Interest-Free)</strong>
-                <div style="font-size: 0.75rem; color: #6b7280;" id="paypal-sim-paylater-label">4 payments due bi-weekly</div>
-              </div>
-            </div>
-            <i data-lucide="circle" style="color: #9ca3af;"></i>
-          </div>
-
-          <div class="paypal-sim-method-option" data-source="bank" id="sim-opt-bank">
-            <div class="paypal-sim-method-details">
-              <i data-lucide="building" style="color: #0070BA;"></i>
-              <div>
-                <strong style="font-size: 0.9rem;">Chase Premier Checking •••• 4091</strong>
-                <div style="font-size: 0.75rem; color: #6b7280;">Instant Transfer (No Fee)</div>
-              </div>
-            </div>
-            <i data-lucide="circle" style="color: #9ca3af;"></i>
-          </div>
-        </div>
-
-        <div style="font-size: 0.78rem; color: #6b7280; line-height: 1.4; background: #f3f4f6; padding: 0.75rem; border-radius: 6px;">
-          <i data-lucide="lock" style="width: 14px; height: 14px; vertical-align: middle; color: #10b981;"></i>
-          Shipping to: <strong id="paypal-sim-shipping-text">Address Provided at Checkout</strong>. Protected by PayPal Buyer Protection.
-        </div>
-
-        <div class="paypal-sim-btn-row">
-          <button class="paypal-sim-confirm-btn" id="paypal-sim-submit-btn">
-            Authorize & Complete Order
-          </button>
-          <button class="paypal-sim-cancel-btn" id="paypal-sim-cancel-btn">
-            Cancel and return to Bamboolume
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- 13. USER AUTHENTICATION & LOGIN/REGISTER MODAL -->
   <div class="modal-overlay hidden" id="auth-modal-overlay">
     <div class="auth-modal">
@@ -854,18 +751,10 @@
       <div class="auth-body">
         <!-- TAB 1: SIGN IN -->
         <div id="auth-panel-signin">
-          <!-- 1-Click Demo Login Option -->
-          <button type="button" class="btn-demo-login" id="demo-login-btn">
-            <i data-lucide="sparkles" style="color: var(--bamboo-gold); width: 16px; height: 16px;"></i>
-            <span>1-Click Fast Login as Vinay Kumar (VIP)</span>
-          </button>
-
-          <div class="or-divider" style="margin-bottom: 1.25rem;"><span>OR SIGN IN WITH PASSWORD</span></div>
-
           <form id="signin-form">
             <div class="form-group" style="margin-bottom: 1rem;">
               <label for="signin-email">Email Address</label>
-              <input type="email" id="signin-email" placeholder="vinay@bamboolume.com" value="vinay@bamboolume.com" required>
+              <input type="email" id="signin-email" placeholder="you@example.com" required>
             </div>
 
             <div class="form-group" style="margin-bottom: 1rem;">
@@ -874,7 +763,7 @@
                 <a href="#" id="switch-to-forgot" style="font-size: 0.78rem; color: var(--bamboo-gold); font-weight: 600;">Forgot Password?</a>
               </div>
               <div class="password-input-wrap">
-                <input type="password" id="signin-password" placeholder="Enter your password" value="Password123!" required>
+                <input type="password" id="signin-password" placeholder="Enter your password" required>
                 <button type="button" class="toggle-password-btn" id="toggle-signin-pw-btn" aria-label="Toggle password visibility">
                   <i data-lucide="eye" style="width: 16px; height: 16px;"></i>
                 </button>
@@ -898,7 +787,7 @@
           <form id="register-form">
             <div class="form-group" style="margin-bottom: 0.85rem;">
               <label for="register-name">Full Name</label>
-              <input type="text" id="register-name" placeholder="E.g. Vinay Kumar" required>
+              <input type="text" id="register-name" placeholder="Your full name" required>
             </div>
 
             <div class="form-group" style="margin-bottom: 0.85rem;">
@@ -934,7 +823,7 @@
             </div>
 
             <button type="submit" class="btn-primary-gold" style="width: 100%; justify-content: center;">
-              <span>Join Botanical VIP Club ($15 Welcome Credit)</span>
+              <span>Create Bamboolume Account</span>
               <i data-lucide="check"></i>
             </button>
           </form>
@@ -948,7 +837,7 @@
           <form id="forgot-form">
             <div class="form-group" style="margin-bottom: 1.25rem;">
               <label for="forgot-email">Account Email</label>
-              <input type="email" id="forgot-email" placeholder="vinay@bamboolume.com" value="vinay@bamboolume.com" required>
+              <input type="email" id="forgot-email" placeholder="you@example.com" required>
             </div>
 
             <div id="forgot-status-msg" class="hidden" style="margin-bottom: 1rem;"></div>
@@ -974,10 +863,10 @@
     <div class="product-modal" style="max-width: 650px;">
       <div class="checkout-header" style="background: var(--deep-forest); color: var(--warm-cream); padding: 1.25rem 1.5rem; display: flex; justify-content: space-between; align-items: center;">
         <div style="display: flex; align-items: center; gap: 0.6rem;">
-          <div class="user-avatar-letter" style="width: 34px; height: 34px; font-size: 1rem;">V</div>
+          <div class="user-avatar-letter" style="width: 34px; height: 34px; font-size: 1rem;">B</div>
           <div>
-            <h3 id="profile-user-name" style="color: var(--warm-cream); font-size: 1.2rem; margin: 0;">Vinay Kumar</h3>
-            <span id="profile-user-email" style="font-size: 0.78rem; color: var(--soft-sage);">vinay@bamboolume.com</span>
+            <h3 id="profile-user-name" style="color: var(--warm-cream); font-size: 1.2rem; margin: 0;">Bamboolume Member</h3>
+            <span id="profile-user-email" style="font-size: 0.78rem; color: var(--soft-sage);">—</span>
           </div>
         </div>
         <button class="drawer-close-btn" id="close-profile-modal-btn" style="color: var(--warm-cream);"><i data-lucide="x"></i></button>
@@ -1100,7 +989,7 @@
 
           <div class="form-group" style="margin-bottom: 0.9rem;">
             <label for="review-author-name">Your Name</label>
-            <input type="text" id="review-author-name" placeholder="E.g. Vinay Kumar" value="Vinay Kumar" required>
+            <input type="text" id="review-author-name" placeholder="Your name" required>
           </div>
 
           <div class="form-group" style="margin-bottom: 0.9rem;">
@@ -1158,6 +1047,20 @@
     </div>
   </div>
 
+  <!-- 17B. POLICIES & CARE GUIDE MODAL -->
+  <div class="modal-overlay hidden" id="policy-modal-overlay">
+    <div class="product-modal" style="max-width: 580px;">
+      <div class="checkout-header" style="background: var(--deep-forest); color: var(--warm-cream); padding: 1.25rem 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 0.6rem;">
+          <i data-lucide="leaf" style="color: var(--bamboo-gold);"></i>
+          <h3 id="policy-modal-title" style="color: var(--warm-cream); font-size: 1.2rem; margin: 0;">Bamboolume Information</h3>
+        </div>
+        <button class="drawer-close-btn" id="close-policy-btn" style="color: var(--warm-cream);"><i data-lucide="x"></i></button>
+      </div>
+      <div id="policy-modal-body" style="padding: 1.5rem; color: var(--text-secondary); line-height: 1.65; font-size: 0.92rem; max-height: 75vh; overflow-y: auto;"></div>
+    </div>
+  </div>
+
   <!-- 18. TOAST NOTIFICATION CONTAINER -->
   <div class="toast-container" id="toast-container"></div>
 
@@ -1199,8 +1102,8 @@
           <li><a href="#craftsmanship-section">Sustainable Bamboo Harvest</a></li>
           <li><a href="#solar-tech-section">Monocrystalline Solar Tech</a></li>
           <li><a href="#simulator-section">Interactive Twilight Demo</a></li>
-          <li><a href="#">Carbon-Neutral Packaging</a></li>
-          <li><a href="#">2-Year Solar Warranty</a></li>
+          <li><a href="#policy" data-info-topic="packaging">Carbon-Neutral Packaging</a></li>
+          <li><a href="#policy" data-info-topic="warranty">2-Year Solar Warranty</a></li>
         </ul>
       </div>
 
@@ -1209,9 +1112,9 @@
         <ul>
           <li><a href="#" id="footer-orders-link">Track Your Order</a></li>
           <li><a href="#" id="footer-faq-link">Solar FAQ & Help</a></li>
-          <li><a href="#">Shipping & Returns Policy</a></li>
-          <li><a href="#">Weatherproofing Maintenance</a></li>
-          <li><a href="#">Battery Care Guide</a></li>
+          <li><a href="#policy" data-info-topic="shipping">Shipping & Returns Policy</a></li>
+          <li><a href="#policy" data-info-topic="maintenance">Weatherproofing Maintenance</a></li>
+          <li><a href="#policy" data-info-topic="battery">Battery Care Guide</a></li>
         </ul>
       </div>
     </div>
@@ -1219,9 +1122,9 @@
     <div class="footer-bottom">
       <div>© 2026 BAMBOOLUME — Handcrafted Botanical Solar Lighting. All rights reserved.</div>
       <div style="display: flex; gap: 1.5rem;">
-        <a href="#">Privacy Policy</a>
-        <a href="#">Terms of Service</a>
-        <a href="#">Sustainability Report</a>
+        <a href="https://checkout.shopify.com/81455579234/policies/45398884450.html?locale=en" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
+        <a href="#policy" data-info-topic="terms">Terms of Service</a>
+        <a href="#policy" data-info-topic="sustainability">Sustainability Report</a>
       </div>
     </div>
   </footer>

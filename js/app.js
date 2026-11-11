@@ -1174,7 +1174,7 @@ class App {
     this.openProductModal(id);
   }
 
-  /* ================= FAQ MODAL ================= */
+  /* ================= FAQ & POLICY INFO MODALS ================= */
   openFaqModal() {
     document.getElementById('faq-modal-overlay')?.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
@@ -1183,6 +1183,56 @@ class App {
 
   closeFaqModal() {
     document.getElementById('faq-modal-overlay')?.classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+
+  openInfoModal(topicKey) {
+    const infoPages = {
+      packaging: {
+        title: 'Carbon-Neutral Botanical Packaging',
+        body: '<p>Every BAMBOOLUME lantern ships in molded recycled kraft pulp inserts and plastic-free botanical starch tape. Multi-lantern bundles are consolidated whenever possible to reduce transit emissions.</p>'
+      },
+      warranty: {
+        title: '2-Year Solar Performance Warranty',
+        body: '<p>Your lantern electronics, monocrystalline solar cap, dusk-to-dawn optical sensor, and LiFePO4 battery cell are covered for 2 full years from delivery against manufacturing or solar-charging defects.</p>'
+      },
+      shipping: {
+        title: 'Shipping & 30-Day Returns Policy',
+        body: '<p><strong>Worldwide Tracked Delivery:</strong> Orders placed via Shopify Checkout are automatically synced to fulfillment with carrier tracking emailed upon dispatch.<br><br><strong>Returns &amp; Replacements:</strong> Contact support within 30 days of delivery for damaged-in-transit replacements or eligible returns.</p>'
+      },
+      maintenance: {
+        title: 'Weatherproofing & Bamboo Care',
+        body: '<p>Wipe the top monocrystalline solar lid every 4–6 weeks with a damp cloth to keep charging efficiency optimal. Brush seasoned Moso bamboo weaves lightly with a dry cloth; all lanterns are IP65 rain-sealed for outdoor mounting.</p>'
+      },
+      battery: {
+        title: 'LiFePO4 Battery Care Guide',
+        body: '<p>Place lanterns outdoors in direct or diffuse daylight for 6–8 hours during initial setup. Each replaceable LiFePO4 cell is rated for 2,500+ nightly discharge cycles and accesses cleanly with a standard screwdriver.</p>'
+      },
+      terms: {
+        title: 'Terms of Service',
+        body: '<p>All orders, pricing, taxes, shipping calculations, and payments are securely processed at checkout through our official Shopify store (<code>auv1g7-nc.myshopify.com</code>).</p>'
+      },
+      sustainability: {
+        title: 'Sustainable Bamboo Harvest Report',
+        body: '<p>BAMBOOLUME sources seasoned Moso bamboo culms that regenerate naturally from root networks without chemical pesticides, paired with zero-grid solar LED lighting.</p>'
+      }
+    };
+
+    const entry = infoPages[topicKey];
+    if (!entry) return;
+
+    const titleEl = document.getElementById('policy-modal-title');
+    const bodyEl = document.getElementById('policy-modal-body');
+    if (titleEl) titleEl.textContent = entry.title;
+    if (bodyEl) bodyEl.innerHTML = entry.body;
+
+    document.getElementById('policy-modal-overlay')?.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  closeInfoModal() {
+    document.getElementById('policy-modal-overlay')?.classList.add('hidden');
     document.body.style.overflow = '';
   }
 
@@ -1240,6 +1290,18 @@ class App {
     document.getElementById('close-faq-btn')?.addEventListener('click', () => this.closeFaqModal());
     document.getElementById('faq-modal-overlay')?.addEventListener('click', (e) => {
       if (e.target.id === 'faq-modal-overlay') this.closeFaqModal();
+    });
+
+    // Footer Policy & Guide Modal Triggers
+    document.querySelectorAll('[data-info-topic]').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.openInfoModal(link.getAttribute('data-info-topic'));
+      });
+    });
+    document.getElementById('close-policy-btn')?.addEventListener('click', () => this.closeInfoModal());
+    document.getElementById('policy-modal-overlay')?.addEventListener('click', (e) => {
+      if (e.target.id === 'policy-modal-overlay') this.closeInfoModal();
     });
 
     // Close Product Modal Button

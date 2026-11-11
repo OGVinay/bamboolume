@@ -12,23 +12,7 @@ class OrdersManager {
   loadOrders() {
     try {
       const data = localStorage.getItem(this.storageKey);
-      if (data) return JSON.parse(data);
-      
-      // Default Demo Order if none exists
-      return [
-        {
-          orderId: '#BL-84192',
-          date: 'Oct 24, 2026',
-          total: 89.00,
-          paymentMethod: 'PayPal Express',
-          transactionId: 'PAYID-MN68192A',
-          items: [
-            { name: 'The Zen Pavilion Hanging Solar Lantern', quantity: 1, price: 89.00, image: './assets/bamboo_hanging_lantern.jpg' }
-          ],
-          statusStage: 3, // 1: Confirmed, 2: Processing, 3: Shipped, 4: Out for Delivery, 5: Delivered
-          estimatedDelivery: 'Tomorrow by 4:00 PM'
-        }
-      ];
+      return data ? JSON.parse(data) : [];
     } catch (e) {
       return [];
     }
@@ -89,8 +73,8 @@ class OrdersManager {
       container.innerHTML = `
         <div class="cart-empty">
           <div class="cart-empty-icon"><i data-lucide="package-open"></i></div>
-          <h4>No active orders</h4>
-          <p>Once you make a purchase, track live delivery status here.</p>
+          <h4>No orders tracked yet</h4>
+          <p>After placing an order at Shopify Checkout, use the live tracking link in your confirmation email to follow delivery.</p>
         </div>
       `;
       if (window.lucide) window.lucide.createIcons();
