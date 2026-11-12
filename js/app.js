@@ -575,7 +575,7 @@ class App {
                   ${product.variants.sizes.map(s => `
                     <button type="button" class="card-size-pill ${s.id === activeSizeId ? 'active' : ''}" 
                       onclick="window.app.selectCardSize('${product.id}', '${s.id}', event)">
-                      ${s.label} (${s.height})
+                      ${s.label} (${s.height})${s.id === 'trio' ? ' <span class="pill-badge-save">15% OFF</span>' : ''}
                     </button>
                   `).join('')}
                 </div>
@@ -893,7 +893,7 @@ class App {
                         <strong class="modal-size-title">${s.label}</strong>
                         <span class="modal-size-dim">${s.dimension}</span>
                       </div>
-                      <div class="modal-size-price">$${Number(s.price).toFixed(2)}</div>
+                      <div class="modal-size-price">$${Number(s.price).toFixed(2)}${s.id === 'trio' ? ' <span class="pill-badge-save">15% OFF</span>' : ''}</div>
                     </div>
                   `).join('')}
                 </div>

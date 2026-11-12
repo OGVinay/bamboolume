@@ -3431,7 +3431,8 @@ button, input, select {
   border-radius: 3px;
 }
 
-.card-combo-pill.active .pill-badge-save {
+.card-combo-pill.active .pill-badge-save,
+.card-size-pill.active .pill-badge-save {
   background: rgba(214, 166, 83, 0.25);
   color: var(--bamboo-gold);
 }

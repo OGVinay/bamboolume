@@ -50,7 +50,34 @@ class CartManager {
     this.updateCartUI();
   }
 
+  syncCartPricesWithCatalog() {
+    if (!Array.isArray(window.PRODUCTS_DATA) || !Array.isArray(this.cart) || this.cart.length === 0) return;
+    let changed = false;
+    this.cart.forEach(item => {
+      if (item.comboInfo && item.comboInfo.qty > 1) return;
+      const product = window.PRODUCTS_DATA.find(p => p.id === item.id);
+      if (!product) return;
+      let freshPrice = Number(product.price);
+      if (item.selectedSize && product.variants && Array.isArray(product.variants.sizes)) {
+        const matchedSize = product.variants.sizes.find(s => s.label === item.selectedSize);
+        if (matchedSize && matchedSize.price !== undefined) {
+          freshPrice = Number(matchedSize.price);
+        }
+      }
+      if (Number.isFinite(freshPrice) && freshPrice > 0 && Number(item.price) !== freshPrice) {
+        item.price = freshPrice;
+        changed = true;
+      }
+    });
+    if (changed) {
+      try {
+        localStorage.setItem(this.cartKey, JSON.stringify(this.cart));
+      } catch (e) {}
+    }
+  }
+
   init() {
+    this.syncCartPricesWithCatalog();
     this.bindEvents();
     this.updateCartUI();
   }
