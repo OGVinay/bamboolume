@@ -84,7 +84,11 @@ class ShopifyIntegration {
    */
   getActiveDiscountCode() {
     const code = window.cart?.appliedPromo?.code;
-    return code ? String(code).trim() : null;
+    if (!code) return null;
+    if (typeof window.cart?.isPromoEligible === 'function' && !window.cart.isPromoEligible()) {
+      return null;
+    }
+    return String(code).trim();
   }
 
   /**

@@ -2,6 +2,11 @@
  * AuraMart Shopping Cart & Coupon Engine
  */
 
+const PROMO_RULES = {
+  NATURE15: { code: 'NATURE15', discount: 0.15, minOrder: 200, label: '15% OFF Orders $200+' },
+  SOLAR20: { code: 'SOLAR20', discount: 0.20, minOrder: 300, label: '20% OFF Orders $300+' }
+};
+
 class CartManager {
   constructor() {
     this.cartKey = 'bamboolume_cart_v1';
@@ -31,23 +36,40 @@ class CartManager {
     this.updateCartUI();
   }
 
+  getPromoRule(code) {
+    if (!code) return null;
+    return PROMO_RULES[String(code).trim().toUpperCase()] || null;
+  }
+
   loadPromo() {
     try {
       const data = localStorage.getItem(this.promoKey);
-      return data ? JSON.parse(data) : null;
+      if (!data) return null;
+      const parsed = JSON.parse(data);
+      const rule = this.getPromoRule(parsed?.code);
+      return rule ? { ...rule } : parsed;
     } catch (e) {
       return null;
     }
   }
 
   savePromo(promo) {
-    this.appliedPromo = promo;
-    if (promo) {
-      localStorage.setItem(this.promoKey, JSON.stringify(promo));
+    const rule = this.getPromoRule(promo?.code);
+    this.appliedPromo = rule ? { ...rule } : promo;
+    if (this.appliedPromo) {
+      localStorage.setItem(this.promoKey, JSON.stringify(this.appliedPromo));
     } else {
       localStorage.removeItem(this.promoKey);
     }
     this.updateCartUI();
+  }
+
+  isPromoEligible(afterBundleSubtotal = null) {
+    const rule = this.appliedPromo ? (this.getPromoRule(this.appliedPromo.code) || this.appliedPromo) : null;
+    if (!rule || !rule.discount) return false;
+    const minOrder = Number(rule.minOrder || 0);
+    const amount = afterBundleSubtotal !== null ? afterBundleSubtotal : this.getTotals().afterBundleSubtotal;
+    return amount >= minOrder;
   }
 
   syncCartPricesWithCatalog() {
@@ -245,15 +267,26 @@ class CartManager {
 
     if (!code) return;
 
-    if (code === 'NATURE15') {
-      this.savePromo({ code: 'NATURE15', discount: 0.15, label: '15% OFF Botanical Coupon' });
-      window.showToast('Promo NATURE15 applied! 15% discount added.', 'success');
-    } else if (code === 'SOLAR20') {
-      this.savePromo({ code: 'SOLAR20', discount: 0.20, label: '20% OFF Solar Special' });
-      window.showToast('Promo SOLAR20 applied! 20% discount added.', 'success');
-    } else {
-      window.showToast('Invalid promo code. Try NATURE15 or SOLAR20', 'info');
+    const rule = this.getPromoRule(code);
+    if (!rule) {
+      window.showToast('Invalid promo code. Try NATURE15 ($200+) or SOLAR20 ($300+)', 'info');
+      if (input) input.value = '';
+      return;
     }
+
+    const { afterBundleSubtotal } = this.getTotals();
+    if (afterBundleSubtotal < rule.minOrder) {
+      const needed = (rule.minOrder - afterBundleSubtotal).toFixed(2);
+      window.showToast(
+        `${rule.code} requires an order over $${rule.minOrder.toFixed(2)} — add $${needed} more to unlock ${Math.round(rule.discount * 100)}% OFF!`,
+        'info'
+      );
+      if (input) input.value = '';
+      return;
+    }
+
+    this.savePromo({ ...rule });
+    window.showToast(`Promo ${rule.code} applied! ${Math.round(rule.discount * 100)}% discount added.`, 'success');
     if (input) input.value = '';
   }
 
@@ -296,10 +329,12 @@ class CartManager {
     bundleDiscount = Number(bundleDiscount.toFixed(2));
     const afterBundleSubtotal = Math.max(0, Number((subtotal - bundleDiscount).toFixed(2)));
 
-    let promoDiscount = 0;
-    if (this.appliedPromo && this.appliedPromo.discount) {
-      promoDiscount = Number((afterBundleSubtotal * this.appliedPromo.discount).toFixed(2));
-    }
+    const activeRule = this.appliedPromo ? (this.getPromoRule(this.appliedPromo.code) || this.appliedPromo) : null;
+    const promoMinOrder = Number(activeRule?.minOrder || 0);
+    const promoEligible = Boolean(activeRule && activeRule.discount && afterBundleSubtotal >= promoMinOrder);
+    const promoDiscount = promoEligible
+      ? Number((afterBundleSubtotal * activeRule.discount).toFixed(2))
+      : 0;
 
     const discount = Number((bundleDiscount + promoDiscount).toFixed(2));
     const netSubtotal = Math.max(0, Number((subtotal - discount).toFixed(2)));
@@ -310,6 +345,8 @@ class CartManager {
       subtotal,
       bundleDiscount,
       promoDiscount,
+      promoEligible,
+      promoMinOrder,
       discount,
       afterBundleSubtotal,
       shipping,
@@ -320,7 +357,7 @@ class CartManager {
   }
 
   updateCartUI() {
-    const { subtotal, bundleDiscount, promoDiscount, discount, total, itemCount, itemBreakdowns } = this.getTotals();
+    const { subtotal, bundleDiscount, promoDiscount, promoEligible, promoMinOrder, afterBundleSubtotal, discount, total, itemCount, itemBreakdowns } = this.getTotals();
 
     // Update Badge Counter
     const cartCountEl = document.getElementById('cart-count');
@@ -383,7 +420,14 @@ class CartManager {
     if (promoStatus && promoName) {
       if (this.appliedPromo) {
         promoStatus.classList.remove('hidden');
-        promoName.textContent = `${this.appliedPromo.code} Applied (${this.appliedPromo.label})`;
+        if (promoEligible) {
+          promoStatus.style.color = 'var(--bamboo-green)';
+          promoName.textContent = `${this.appliedPromo.code} Applied (${this.appliedPromo.label})`;
+        } else {
+          const shortfall = Math.max(0, promoMinOrder - afterBundleSubtotal).toFixed(2);
+          promoStatus.style.color = '#b45309';
+          promoName.textContent = `${this.appliedPromo.code} Needs $${promoMinOrder}+ Order (Add $${shortfall} more)`;
+        }
       } else {
         promoStatus.classList.add('hidden');
       }
