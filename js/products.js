@@ -154,7 +154,7 @@ const PRODUCTS_DATA = [
           dimension: "30cm + 40cm + 50cm Trio",
           height: "30cm, 40cm & 50cm",
           diameter: "9.5cm each",
-          price: 383.78,
+          price: 383.32,
           originalPrice: 450.97,
           image: "./assets/bamboo_kadomatsu_trio.jpg",
           desc: "The full 3-piece Kadomatsu arrangement (Small 30cm + Medium 40cm + Large 50cm) creating the harmonious Zen garden cluster shown in the twilight garden photo."
