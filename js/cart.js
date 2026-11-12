@@ -85,51 +85,118 @@ class CartManager {
     document.body.style.overflow = '';
   }
 
+  getComboOffersForProduct(productId) {
+    const product = (window.PRODUCTS_DATA || []).find(p => p.id === productId);
+    if (!product || !Array.isArray(product.comboOffers) || product.comboOffers.length === 0) {
+      return null;
+    }
+    return product.comboOffers;
+  }
+
+  getBundleTier(offers, totalUnits) {
+    if (!offers || totalUnits < 2) return null;
+    // Quantities over 5 share the Combo of 5 discount percentage
+    const qualifying = offers
+      .filter(o => o.qty <= totalUnits && o.discountPct > 0)
+      .sort((a, b) => b.qty - a.qty);
+    return qualifying[0] || null;
+  }
+
+  getItemUnitMetrics(item) {
+    const packQty = item.comboInfo && item.comboInfo.qty > 1 ? Number(item.comboInfo.qty) : 1;
+    const units = packQty * Number(item.quantity || 0);
+    const unitPrice = item.comboInfo && item.comboInfo.qty > 1
+      ? (item.comboInfo.basePrice !== undefined
+          ? Number(item.comboInfo.basePrice)
+          : Number((Number(item.comboInfo.regularTotal || item.price) / packQty).toFixed(2)))
+      : Number(item.price);
+    const lineRegularTotal = Number((unitPrice * units).toFixed(2));
+    return { units, unitPrice, lineRegularTotal };
+  }
+
+  getProductUnitCounts() {
+    const counts = {};
+    this.cart.forEach(item => {
+      const { units } = this.getItemUnitMetrics(item);
+      counts[item.id] = (counts[item.id] || 0) + units;
+    });
+    return counts;
+  }
+
+  getProductBundleTier(productId) {
+    const offers = this.getComboOffersForProduct(productId);
+    if (!offers) return null;
+    const counts = this.getProductUnitCounts();
+    return this.getBundleTier(offers, counts[productId] || 0);
+  }
+
+  getProductBundlePct(productId) {
+    return this.getProductBundleTier(productId)?.discountPct || 0;
+  }
+
   addItem(product, quantity = 1, selectedColor = null, selectedSize = null, customPrice = null, customImage = null, comboInfo = null) {
-    const finalPrice = customPrice !== null ? Number(customPrice) : Number(product.price);
+    const packQty = comboInfo && comboInfo.qty > 1 ? Number(comboInfo.qty) : 1;
+    const addedUnits = Number(quantity) * packQty;
+    const unitPrice = comboInfo && comboInfo.qty > 1
+      ? (comboInfo.basePrice !== undefined
+          ? Number(comboInfo.basePrice)
+          : Number((Number(customPrice ?? product.price) / packQty).toFixed(2)))
+      : (customPrice !== null ? Number(customPrice) : Number(product.price));
     const finalImage = customImage || product.image;
     const finalColor = selectedColor || (product.variants?.colors?.[0] || null);
     const finalSize = selectedSize || null;
-    
+
     let displayName = product.name;
     if (finalSize) displayName += ` - ${finalSize}`;
-    if (comboInfo && comboInfo.qty > 1) displayName += ` (Combo of ${comboInfo.qty})`;
+
+    const prevTierPct = this.getProductBundlePct(product.id);
 
     const existingIndex = this.cart.findIndex(
-      item => item.id === product.id && 
-              item.selectedColor === finalColor && 
+      item => item.id === product.id &&
+              item.selectedColor === finalColor &&
               item.selectedSize === finalSize &&
-              (item.comboInfo ? item.comboInfo.qty : 1) === (comboInfo ? comboInfo.qty : 1)
+              !(item.comboInfo && item.comboInfo.qty > 1)
     );
 
     if (existingIndex > -1) {
-      this.cart[existingIndex].quantity += quantity;
+      this.cart[existingIndex].quantity += addedUnits;
     } else {
       this.cart.push({
         id: product.id,
         name: displayName,
         baseName: product.name,
-        price: finalPrice,
+        price: unitPrice,
         image: finalImage,
         category: product.category,
-        quantity: quantity,
+        quantity: addedUnits,
         selectedColor: finalColor,
         selectedSize: finalSize,
-        comboInfo: comboInfo
+        comboInfo: null
       });
     }
 
     this.saveCart();
-    window.showToast(`Added "${displayName}" to cart!`, 'success');
+    const newTier = this.getProductBundleTier(product.id);
+    if (newTier && newTier.discountPct > prevTierPct) {
+      window.showToast(`Added "${displayName}" — ${newTier.label} (${newTier.discountPct}% OFF) applied!`, 'success');
+    } else {
+      window.showToast(`Added "${displayName}" to cart!`, 'success');
+    }
   }
 
   updateQuantity(index, change) {
     if (index >= 0 && index < this.cart.length) {
+      const productId = this.cart[index].id;
+      const prevTierPct = this.getProductBundlePct(productId);
       this.cart[index].quantity += change;
       if (this.cart[index].quantity <= 0) {
         this.cart.splice(index, 1);
       }
       this.saveCart();
+      const newTier = this.getProductBundleTier(productId);
+      if (change > 0 && newTier && newTier.discountPct > prevTierPct) {
+        window.showToast(`Bundle unlocked: ${newTier.label} (${newTier.discountPct}% OFF)!`, 'success');
+      }
     }
   }
 
@@ -173,31 +240,64 @@ class CartManager {
   }
 
   getTotals() {
-    const subtotal = this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    
-    let discount = 0;
+    const productCounts = this.getProductUnitCounts();
+    let subtotal = 0;
+    let bundleDiscount = 0;
+    let itemCount = 0;
+
+    const itemBreakdowns = this.cart.map(item => {
+      const { units, lineRegularTotal } = this.getItemUnitMetrics(item);
+      const totalForProduct = productCounts[item.id] || units;
+      const offers = this.getComboOffersForProduct(item.id);
+      const tier = offers ? this.getBundleTier(offers, totalForProduct) : null;
+      const bundlePct = tier ? tier.discountPct : 0;
+      const lineDiscount = Number((lineRegularTotal * (bundlePct / 100)).toFixed(2));
+      const lineNetTotal = Number((lineRegularTotal - lineDiscount).toFixed(2));
+
+      subtotal += lineRegularTotal;
+      bundleDiscount += lineDiscount;
+      itemCount += units;
+
+      return {
+        units,
+        totalForProduct,
+        tier,
+        bundlePct,
+        lineRegularTotal,
+        lineDiscount,
+        lineNetTotal
+      };
+    });
+
+    subtotal = Number(subtotal.toFixed(2));
+    bundleDiscount = Number(bundleDiscount.toFixed(2));
+    const afterBundleSubtotal = Math.max(0, Number((subtotal - bundleDiscount).toFixed(2)));
+
+    let promoDiscount = 0;
     if (this.appliedPromo && this.appliedPromo.discount) {
-      discount = subtotal * this.appliedPromo.discount;
+      promoDiscount = Number((afterBundleSubtotal * this.appliedPromo.discount).toFixed(2));
     }
 
-    const shipping = (subtotal >= this.freeShippingGoal || (this.appliedPromo && this.appliedPromo.freeShipping)) || subtotal === 0 ? 0 : 15.00;
-    const taxableAmount = Math.max(0, subtotal - discount);
-    const tax = taxableAmount * 0.08;
-    const total = taxableAmount + shipping + tax;
-    const itemCount = this.cart.reduce((sum, item) => sum + (item.comboInfo && item.comboInfo.qty ? (item.comboInfo.qty * item.quantity) : item.quantity), 0);
+    const discount = Number((bundleDiscount + promoDiscount).toFixed(2));
+    const netSubtotal = Math.max(0, Number((subtotal - discount).toFixed(2)));
+    const shipping = (afterBundleSubtotal >= this.freeShippingGoal || (this.appliedPromo && this.appliedPromo.freeShipping)) || subtotal === 0 ? 0 : 15.00;
+    const total = Number((netSubtotal + shipping).toFixed(2));
 
     return {
       subtotal,
+      bundleDiscount,
+      promoDiscount,
       discount,
+      afterBundleSubtotal,
       shipping,
-      tax,
       total,
-      itemCount
+      itemCount,
+      itemBreakdowns
     };
   }
 
   updateCartUI() {
-    const { subtotal, discount, shipping, tax, total, itemCount } = this.getTotals();
+    const { subtotal, bundleDiscount, promoDiscount, discount, afterBundleSubtotal, shipping, total, itemCount, itemBreakdowns } = this.getTotals();
 
     // Update Badge Counter
     const cartCountEl = document.getElementById('cart-count');
@@ -209,12 +309,12 @@ class CartManager {
     const progressText = document.getElementById('shipping-progress-text');
     const progressBar = document.getElementById('shipping-progress-bar');
     if (progressText && progressBar) {
-      if (subtotal >= this.freeShippingGoal) {
+      if (afterBundleSubtotal >= this.freeShippingGoal) {
         progressText.innerHTML = '🎉 You unlocked <strong>FREE Express Shipping!</strong>';
         progressBar.style.width = '100%';
       } else {
-        const remaining = (this.freeShippingGoal - subtotal).toFixed(2);
-        const percent = Math.min(100, (subtotal / this.freeShippingGoal) * 100);
+        const remaining = (this.freeShippingGoal - afterBundleSubtotal).toFixed(2);
+        const percent = Math.min(100, (afterBundleSubtotal / this.freeShippingGoal) * 100);
         progressText.innerHTML = `Add <strong>$${remaining}</strong> more for FREE Express Shipping!`;
         progressBar.style.width = `${percent}%`;
       }
@@ -234,7 +334,9 @@ class CartManager {
       if (cartFooter) cartFooter.classList.remove('hidden');
 
       if (container) {
-        container.innerHTML = this.cart.map((item, index) => `
+        container.innerHTML = this.cart.map((item, index) => {
+          const b = itemBreakdowns[index];
+          return `
           <div class="cart-item">
             <img src="${item.image}" alt="${item.name}" class="cart-item-img">
             <div class="cart-item-info">
@@ -242,11 +344,14 @@ class CartManager {
                 <div class="cart-item-title">${item.name}</div>
                 <div class="card-category" style="font-size: 0.72rem; display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.2rem;">
                   ${item.selectedSize ? `<span style="color: var(--deep-forest); font-weight: 700; background: rgba(214,166,83,0.22); padding: 0.1rem 0.4rem; border-radius: 4px;">Size: ${item.selectedSize}</span>` : ''}
-                  ${item.comboInfo && item.comboInfo.qty > 1 ? `<span style="color: #065f46; font-weight: 700; background: rgba(16,185,129,0.18); padding: 0.1rem 0.4rem; border-radius: 4px; border: 1px solid rgba(16,185,129,0.3);"><i data-lucide="sparkles" style="width: 10px; height: 10px; vertical-align: middle;"></i> Combo of ${item.comboInfo.qty} (Saved $${Number(item.comboInfo.savedAmount).toFixed(2)})</span>` : ''}
+                  ${b.bundlePct > 0 ? `<span style="color: #065f46; font-weight: 700; background: rgba(16,185,129,0.18); padding: 0.1rem 0.4rem; border-radius: 4px; border: 1px solid rgba(16,185,129,0.3);"><i data-lucide="sparkles" style="width: 10px; height: 10px; vertical-align: middle;"></i> Bundle (${b.totalForProduct}×): ${b.bundlePct}% OFF (Saved $${b.lineDiscount.toFixed(2)})</span>` : ''}
                   ${item.selectedColor ? `<span>Finish: ${item.selectedColor}</span>` : ''}
                 </div>
               </div>
-              <div class="cart-item-price">$${(item.price * item.quantity).toFixed(2)}</div>
+              <div class="cart-item-price">
+                ${b.bundlePct > 0 ? `<span style="text-decoration: line-through; color: var(--text-muted); font-size: 0.82rem; font-weight: 500; margin-right: 0.35rem;">$${b.lineRegularTotal.toFixed(2)}</span>` : ''}
+                $${b.lineNetTotal.toFixed(2)}
+              </div>
               <div class="cart-qty-ctrl">
                 <button class="qty-btn" onclick="window.cart.updateQuantity(${index}, -1)">-</button>
                 <span class="qty-val">${item.quantity}</span>
@@ -257,7 +362,8 @@ class CartManager {
               <i data-lucide="trash-2"></i>
             </button>
           </div>
-        `).join('');
+        `;
+        }).join('');
 
         if (window.lucide) window.lucide.createIcons();
       }
@@ -278,22 +384,30 @@ class CartManager {
     // Summary Calculations
     const subtotalEl = document.getElementById('summary-subtotal');
     const discountRow = document.getElementById('summary-discount-row');
+    const discountLabelEl = document.getElementById('summary-discount-label');
     const discountEl = document.getElementById('summary-discount');
     const shippingEl = document.getElementById('summary-shipping');
-    const taxEl = document.getElementById('summary-tax');
     const totalEl = document.getElementById('summary-total');
 
     if (subtotalEl) subtotalEl.textContent = `$${subtotal.toFixed(2)}`;
     if (discountRow && discountEl) {
       if (discount > 0) {
         discountRow.classList.remove('hidden');
+        if (discountLabelEl) {
+          if (bundleDiscount > 0 && promoDiscount > 0) {
+            discountLabelEl.textContent = 'Bundle & Promo Discount';
+          } else if (bundleDiscount > 0) {
+            discountLabelEl.textContent = 'Bundle Discount';
+          } else {
+            discountLabelEl.textContent = 'Special Discount';
+          }
+        }
         discountEl.textContent = `-$${discount.toFixed(2)}`;
       } else {
         discountRow.classList.add('hidden');
       }
     }
     if (shippingEl) shippingEl.textContent = shipping === 0 ? 'FREE' : `$${shipping.toFixed(2)}`;
-    if (taxEl) taxEl.textContent = `$${tax.toFixed(2)}`;
     if (totalEl) totalEl.textContent = `$${total.toFixed(2)}`;
 
     // Update PayPal Pay Later Installment in Cart Drawer
