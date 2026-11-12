@@ -49,12 +49,47 @@ class App {
     };
   }
 
+  async syncShopifyStock() {
+    if (!window.shopifyIntegration?.fetchLiveInventory) return;
+    await window.shopifyIntegration.fetchLiveInventory();
+    this.renderProducts();
+  }
+
+  getProductStockInfo(product, sizeId = null) {
+    if (window.shopifyIntegration?.getStockForProduct) {
+      return window.shopifyIntegration.getStockForProduct(product, sizeId);
+    }
+    const fallback = product?.stockCount ?? 0;
+    return {
+      inStock: product?.inStock !== false && fallback > 0,
+      stockCount: fallback,
+      isLiveCount: false
+    };
+  }
+
+  renderStockPillMarkup(stockInfo) {
+    if (!stockInfo.inStock) {
+      return '<span class="stock-status-pill sold-out">SOLD OUT</span>';
+    }
+    const label = typeof stockInfo.stockCount === 'number'
+      ? `IN STOCK (${stockInfo.stockCount} LEFT)`
+      : 'IN STOCK';
+    return `<span class="stock-status-pill in-stock">${label}</span>`;
+  }
+
+  ensureInStock(product, sizeId = null) {
+    if (this.getProductStockInfo(product, sizeId).inStock) return true;
+    this.showToast('This item is currently sold out.', 'info');
+    return false;
+  }
+
   init() {
     this.initTheme();
     this.initHero();
     this.initSimulatorVideo();
     this.bindEvents();
     this.renderProducts();
+    this.syncShopifyStock();
     this.updateWishlistCount();
 
     if (window.lucide) window.lucide.createIcons();
@@ -88,6 +123,7 @@ class App {
     if (!product || !window.cart) return;
 
     const activeSizeId = this.selectedCardSizes[id] || (product.variants?.sizes ? product.variants.sizes[0].id : null);
+    if (!this.ensureInStock(product, activeSizeId)) return;
     const size = product.variants?.sizes ? (product.variants.sizes.find(s => s.id === activeSizeId) || product.variants.sizes[0]) : null;
     const sizeLabel = size ? `${size.label} (${size.dimension})` : null;
     const sizeImage = size ? size.image : product.image;
@@ -503,6 +539,7 @@ class App {
       const displayImg = this.selectedCardSizes[product.id] && activeSize ? activeSize.image : product.image;
       const payLaterVal = (displayPrice / 4).toFixed(2);
       const ratingInfo = window.reviewsManager ? window.reviewsManager.getRatingSummary(product.id) : { average: product.rating, count: product.reviewsCount };
+      const stockInfo = this.getProductStockInfo(product, activeSizeId);
 
       return `
         <article class="product-card" data-id="${product.id}">
@@ -524,6 +561,10 @@ class App {
               <span class="stars-gold">${'★'.repeat(Math.round(ratingInfo.average))}${'☆'.repeat(5 - Math.round(ratingInfo.average))}</span>
               <strong style="color: var(--deep-forest); font-size: 0.82rem;">${ratingInfo.average}</strong>
               <span class="rating-count-sub">(${ratingInfo.count || product.reviewsCount} reviews)</span>
+            </div>
+
+            <div class="product-card-stock-row" id="product-card-stock-${product.id}">
+              ${this.renderStockPillMarkup(stockInfo)}
             </div>
 
             <!-- Size Selector Pills on Card -->
@@ -578,8 +619,8 @@ class App {
             </div>
 
             <div class="product-actions">
-              <button class="btn-add-cart" onclick="window.app.addCardItemToCart('${product.id}')">
-                <i data-lucide="shopping-bag" style="width: 16px; height: 16px;"></i> Add to Cart
+              <button class="btn-add-cart" id="product-card-add-${product.id}" onclick="window.app.addCardItemToCart('${product.id}')" ${stockInfo.inStock ? '' : 'disabled style="opacity: 0.55; cursor: not-allowed;"'}>
+                <i data-lucide="shopping-bag" style="width: 16px; height: 16px;"></i> ${stockInfo.inStock ? 'Add to Cart' : 'Sold Out'}
               </button>
               <button class="btn-quick-view" onclick="window.app.openProductModal('${product.id}')" title="Quick View Specs">
                 <i data-lucide="eye" style="width: 16px; height: 16px;"></i>
@@ -612,6 +653,16 @@ class App {
     const savingsEl = document.getElementById(`card-savings-${productId}`);
 
     if (imgEl) imgEl.src = size.image;
+    const stockRowEl = document.getElementById(`product-card-stock-${productId}`);
+    const cardAddBtn = document.getElementById(`product-card-add-${productId}`);
+    const stockInfo = this.getProductStockInfo(product, sizeId);
+    if (stockRowEl) stockRowEl.innerHTML = this.renderStockPillMarkup(stockInfo);
+    if (cardAddBtn) {
+      cardAddBtn.disabled = !stockInfo.inStock;
+      cardAddBtn.style.opacity = stockInfo.inStock ? '' : '0.55';
+      cardAddBtn.style.cursor = stockInfo.inStock ? '' : 'not-allowed';
+      cardAddBtn.innerHTML = `<i data-lucide="shopping-bag" style="width: 16px; height: 16px;"></i> ${stockInfo.inStock ? 'Add to Cart' : 'Sold Out'}`;
+    }
     if (priceEl) priceEl.textContent = `$${Number(comboDetails.discountedTotal).toFixed(2)}`;
     if (oldPriceEl) {
       if (comboDetails.discountPct > 0) {
@@ -717,6 +768,7 @@ class App {
     if (!product || !window.cart) return;
 
     const activeSizeId = this.selectedCardSizes[productId] || (product.variants?.sizes ? product.variants.sizes[0].id : null);
+    if (!this.ensureInStock(product, activeSizeId)) return;
     const size = product.variants?.sizes ? (product.variants.sizes.find(s => s.id === activeSizeId) || product.variants.sizes[0]) : null;
     const sizeLabel = size ? `${size.label} (${size.dimension})` : null;
     const sizeImage = size ? size.image : product.image;
@@ -791,6 +843,7 @@ class App {
     const currentImage = this.selectedCardSizes[id] && activeSize ? activeSize.image : product.image;
     const payLaterVal = (currentPrice / 4).toFixed(2);
     const ratingInfo = window.reviewsManager ? window.reviewsManager.getRatingSummary(product.id) : { average: product.rating, count: product.reviewsCount };
+    const modalStockInfo = this.getProductStockInfo(product, this.modalSelectedSizeId);
 
     const modalBody = document.getElementById('modal-content-container');
     const overlay = document.getElementById('product-modal-overlay');
@@ -822,9 +875,7 @@ class App {
             <div class="modal-price-strip">
               <span class="modal-main-price" id="modal-price-val">$${Number(currentPrice).toFixed(2)}</span>
               <span style="font-size: 1.1rem; text-decoration: line-through; color: var(--text-muted); ${currentOrigPrice ? 'display: inline;' : 'display: none;'}" id="modal-oldprice-val">$${currentOrigPrice ? Number(currentOrigPrice).toFixed(2) : ''}</span>
-              <span style="font-size: 0.78rem; font-weight: 700; color: var(--bamboo-green); background: rgba(72,107,69,0.12); padding: 0.2rem 0.6rem; border-radius: 4px;">
-                IN STOCK (${product.stockCount} LEFT)
-              </span>
+              <span id="modal-stock-wrap">${this.renderStockPillMarkup(modalStockInfo)}</span>
             </div>
 
             <!-- Size Selector Options -->
@@ -959,6 +1010,10 @@ class App {
     const oldPriceVal = document.getElementById('modal-oldprice-val');
     const payLaterVal = document.getElementById('modal-paylater-val');
     const descVal = document.getElementById('modal-size-desc');
+    const modalStockWrap = document.getElementById('modal-stock-wrap');
+    if (modalStockWrap) {
+      modalStockWrap.innerHTML = this.renderStockPillMarkup(this.getProductStockInfo(product, sizeId));
+    }
 
     if (priceVal) priceVal.textContent = `$${Number(comboDetails.discountedTotal).toFixed(2)}`;
     if (oldPriceVal) {
@@ -1065,6 +1120,7 @@ class App {
 
     if (product && window.cart) {
       const activeSize = product.variants?.sizes ? (product.variants.sizes.find(s => s.id === this.modalSelectedSizeId) || product.variants.sizes[0]) : null;
+      if (!this.ensureInStock(product, activeSize ? activeSize.id : this.modalSelectedSizeId)) return;
       const sizeLabel = activeSize ? `${activeSize.label} (${activeSize.dimension})` : null;
       const sizeImage = activeSize ? activeSize.image : product.image;
 
@@ -1089,6 +1145,7 @@ class App {
     if (product) {
       const activeSize = product.variants?.sizes ? (product.variants.sizes.find(s => s.id === this.modalSelectedSizeId) || product.variants.sizes[0]) : null;
       const sizeId = activeSize ? activeSize.id : this.modalSelectedSizeId;
+      if (!this.ensureInStock(product, sizeId)) return;
       const sizeLabel = activeSize ? `${activeSize.label} (${activeSize.dimension})` : null;
       const sizeImage = activeSize ? activeSize.image : product.image;
 

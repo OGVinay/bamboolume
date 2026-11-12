@@ -3571,3 +3571,28 @@ button, input, select {
 }
 
 
+
+.product-card-stock-row {
+  margin-bottom: 0.55rem;
+}
+
+.stock-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: 4px;
+  letter-spacing: 0.3px;
+}
+
+.stock-status-pill.in-stock {
+  color: var(--bamboo-green);
+  background: rgba(72, 107, 69, 0.12);
+}
+
+.stock-status-pill.sold-out {
+  color: #b91c1c;
+  background: rgba(239, 68, 68, 0.14);
+}

@@ -8,7 +8,8 @@ class ShopifyIntegration {
   constructor() {
     this.storeDomain = 'auv1g7-nc.myshopify.com';
     this.storefrontToken = '66bacc09149b1266c889f8371962cdbe';
-    this.graphqlEndpoint = `https://${this.storeDomain}/api/2024-01/graphql.json`;
+    this.graphqlEndpoint = `https://${this.storeDomain}/api/2025-01/graphql.json`;
+    this.variantInventory = {};
 
     // Live Product & Variant mappings connected from Shopify & CJ Dropshipping
     this.variantMap = {
@@ -140,6 +141,115 @@ class ShopifyIntegration {
   }
 
   /**
+   * Launch Shopify Checkout in a new tab so Bamboolume stays open behind it
+   */
+  openCheckoutUrl(url) {
+    if (!url) return;
+    window.cart?.closeCartDrawer?.();
+    window.checkoutManager?.closeCheckout?.();
+    const popup = window.open(url, '_blank', 'noopener,noreferrer');
+    if (!popup) {
+      window.location.href = url;
+    }
+  }
+
+  /**
+   * Fetch live availability & stock counts from Shopify Storefront API
+   */
+  async fetchLiveInventory() {
+    const query = `
+      {
+        products(first: 20) {
+          edges {
+            node {
+              variants(first: 20) {
+                edges {
+                  node {
+                    id
+                    availableForSale
+                    quantityAvailable
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    `;
+
+    try {
+      const response = await fetch(this.graphqlEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Shopify-Storefront-Access-Token': this.storefrontToken
+        },
+        body: JSON.stringify({ query })
+      });
+      const json = await response.json();
+      const edges = json?.data?.products?.edges || [];
+      const nextMap = {};
+      edges.forEach(pe => {
+        (pe?.node?.variants?.edges || []).forEach(ve => {
+          const v = ve?.node;
+          if (!v?.id) return;
+          const numericId = v.id.split('/').pop();
+          nextMap[numericId] = {
+            availableForSale: Boolean(v.availableForSale),
+            quantityAvailable: typeof v.quantityAvailable === 'number' ? v.quantityAvailable : null
+          };
+        });
+      });
+      if (Object.keys(nextMap).length > 0) {
+        this.variantInventory = nextMap;
+      }
+      return this.variantInventory;
+    } catch (e) {
+      console.warn('Unable to sync live Shopify inventory, using fallback counts', e);
+      return null;
+    }
+  }
+
+  /**
+   * Resolve stock availability & remaining count for a product/size
+   */
+  getStockForProduct(product, sizeId = null) {
+    if (!product) return { inStock: false, stockCount: 0, isLiveCount: false };
+
+    const activeSize = sizeId && product.variants?.sizes
+      ? product.variants.sizes.find(s => s.id === sizeId)
+      : product.variants?.sizes?.[0];
+    const fallbackCount = activeSize?.stockCount ?? product.stockCount ?? 0;
+
+    const resolved = this.getVariantId(product.id, sizeId);
+    const variantIds = Array.isArray(resolved) ? resolved : [resolved];
+    const records = variantIds.map(id => this.variantInventory[id]).filter(Boolean);
+
+    if (records.length === variantIds.length && records.length > 0) {
+      const inStock = records.every(r => r.availableForSale);
+      const liveCounts = records.map(r => r.quantityAvailable).filter(q => typeof q === 'number');
+      if (liveCounts.length === records.length) {
+        return {
+          inStock: inStock && Math.min(...liveCounts) > 0,
+          stockCount: Math.min(...liveCounts),
+          isLiveCount: true
+        };
+      }
+      return {
+        inStock,
+        stockCount: inStock ? fallbackCount : 0,
+        isLiveCount: false
+      };
+    }
+
+    return {
+      inStock: product.inStock !== false && fallbackCount > 0,
+      stockCount: fallbackCount,
+      isLiveCount: false
+    };
+  }
+
+  /**
    * Instant 1-Click Buy Now for a specific product and size
    */
   buyNow(productId, sizeId, quantity = 1) {
@@ -155,7 +265,7 @@ class ShopifyIntegration {
     if (discountCode) {
       url += `?discount=${encodeURIComponent(discountCode)}`;
     }
-    window.location.href = url;
+    this.openCheckoutUrl(url);
   }
 
   /**
@@ -229,22 +339,22 @@ class ShopifyIntegration {
   }
 
   /**
-   * Redirect to Shopify Checkout
+   * Redirect to Shopify Checkout in a new tab
    */
   async proceedToCheckout(cartItems, customer = null) {
-    if (window.showToast) window.showToast('Redirecting to secure Shopify checkout...', 'info');
+    if (window.showToast) window.showToast('Opening Shopify Checkout in a new tab...', 'info');
     
     // First try direct permalink with prefilled address
     const permalink = this.buildCartPermalink(cartItems, customer);
     if (permalink) {
-      window.location.href = permalink;
+      this.openCheckoutUrl(permalink);
       return;
     }
 
     // Alternative via API
     const apiUrl = await this.createStorefrontCheckout(cartItems);
     if (apiUrl) {
-      window.location.href = apiUrl;
+      this.openCheckoutUrl(apiUrl);
     }
   }
 }
