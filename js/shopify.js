@@ -79,6 +79,14 @@ class ShopifyIntegration {
   }
 
   /**
+   * Read currently applied cart promo code, if any
+   */
+  getActiveDiscountCode() {
+    const code = window.cart?.appliedPromo?.code;
+    return code ? String(code).trim() : null;
+  }
+
+  /**
    * Build direct Shopify Cart Permalink
    * e.g. https://auv1g7-nc.myshopify.com/cart/50921580494946:1
    */
@@ -103,8 +111,12 @@ class ShopifyIntegration {
 
     let checkoutUrl = `https://${this.storeDomain}/cart/${parts.join(',')}`;
 
-    // Add optional prefilled checkout fields
+    // Add optional prefilled checkout fields & active discount code
     const params = new URLSearchParams();
+    const discountCode = this.getActiveDiscountCode();
+    if (discountCode) {
+      params.append('discount', discountCode);
+    }
     if (customer) {
       if (customer.email) params.append('checkout[email]', customer.email);
       if (customer.name) {
@@ -138,7 +150,11 @@ class ShopifyIntegration {
     } else {
       parts = `${variantResolution}:${quantity}`;
     }
-    const url = `https://${this.storeDomain}/cart/${parts}`;
+    let url = `https://${this.storeDomain}/cart/${parts}`;
+    const discountCode = this.getActiveDiscountCode();
+    if (discountCode) {
+      url += `?discount=${encodeURIComponent(discountCode)}`;
+    }
     window.location.href = url;
   }
 
@@ -185,6 +201,9 @@ class ShopifyIntegration {
     `;
 
     try {
+      const discountCode = this.getActiveDiscountCode();
+      const cartInput = discountCode ? { lines, discountCodes: [discountCode] } : { lines };
+
       const response = await fetch(this.graphqlEndpoint, {
         method: 'POST',
         headers: {
@@ -193,7 +212,7 @@ class ShopifyIntegration {
         },
         body: JSON.stringify({
           query: mutation,
-          variables: { input: { lines } }
+          variables: { input: cartInput }
         })
       });
 

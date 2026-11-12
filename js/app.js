@@ -917,8 +917,8 @@ class App {
                 <i data-lucide="shopping-bag"></i> Add to Garden Basket
               </button>
               <button class="btn-paypal" onclick="window.app.buyNowWithPayPal('${product.id}')" style="justify-content: center; padding: 0.85rem;">
-                <img src="https://www.paypalobjects.com/webstatic/icon/pp258.png" alt="PayPal" class="paypal-btn-icon">
-                <span>Instant Checkout • Shopify & PayPal</span>
+                <i data-lucide="zap" style="width: 16px; height: 16px;"></i>
+                <span>Instant Shopify Checkout</span>
               </button>
             </div>
           </div>
@@ -1111,7 +1111,7 @@ class App {
         window.shopifyIntegration.buyNow(id, sizeId, comboQty);
       } else if (window.checkoutManager) {
         window.checkoutManager.openCheckout(2);
-        this.showToast('Initiating PayPal Express Checkout...', 'info');
+        this.showToast('Opening Shopify Checkout...', 'info');
       }
     }
   }
