@@ -147,8 +147,13 @@ class ShopifyIntegration {
     if (!url) return;
     window.cart?.closeCartDrawer?.();
     window.checkoutManager?.closeCheckout?.();
-    const popup = window.open(url, '_blank', 'noopener,noreferrer');
-    if (!popup) {
+    // Omit 'noopener' from windowFeatures so browsers return the WindowProxy instead of null
+    const popup = window.open(url, '_blank');
+    if (popup) {
+      try {
+        popup.opener = null;
+      } catch (_) {}
+    } else {
       window.location.href = url;
     }
   }
