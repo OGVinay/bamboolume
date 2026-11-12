@@ -8,7 +8,6 @@ class CartManager {
     this.promoKey = 'bamboolume_promo_v1';
     this.cart = this.loadCart();
     this.appliedPromo = this.loadPromo();
-    this.freeShippingGoal = 100.00; // Free shipping above $100
 
     this.init();
   }
@@ -225,9 +224,6 @@ class CartManager {
     } else if (code === 'SOLAR20') {
       this.savePromo({ code: 'SOLAR20', discount: 0.20, label: '20% OFF Solar Special' });
       window.showToast('Promo SOLAR20 applied! 20% discount added.', 'success');
-    } else if (code === 'FREESHIP') {
-      this.savePromo({ code: 'FREESHIP', discount: 0, freeShipping: true, label: 'Free Carbon-Neutral Shipping' });
-      window.showToast('Free shipping promo applied!', 'success');
     } else {
       window.showToast('Invalid promo code. Try NATURE15 or SOLAR20', 'info');
     }
@@ -280,8 +276,8 @@ class CartManager {
 
     const discount = Number((bundleDiscount + promoDiscount).toFixed(2));
     const netSubtotal = Math.max(0, Number((subtotal - discount).toFixed(2)));
-    const shipping = (afterBundleSubtotal >= this.freeShippingGoal || (this.appliedPromo && this.appliedPromo.freeShipping)) || subtotal === 0 ? 0 : 15.00;
-    const total = Number((netSubtotal + shipping).toFixed(2));
+    const shipping = 0;
+    const total = netSubtotal;
 
     return {
       subtotal,
@@ -297,28 +293,13 @@ class CartManager {
   }
 
   updateCartUI() {
-    const { subtotal, bundleDiscount, promoDiscount, discount, afterBundleSubtotal, shipping, total, itemCount, itemBreakdowns } = this.getTotals();
+    const { subtotal, bundleDiscount, promoDiscount, discount, total, itemCount, itemBreakdowns } = this.getTotals();
 
     // Update Badge Counter
     const cartCountEl = document.getElementById('cart-count');
     const cartDrawerCountEl = document.getElementById('cart-drawer-count');
     if (cartCountEl) cartCountEl.textContent = itemCount;
     if (cartDrawerCountEl) cartDrawerCountEl.textContent = `(${itemCount})`;
-
-    // Shipping Goal Progress Bar
-    const progressText = document.getElementById('shipping-progress-text');
-    const progressBar = document.getElementById('shipping-progress-bar');
-    if (progressText && progressBar) {
-      if (afterBundleSubtotal >= this.freeShippingGoal) {
-        progressText.innerHTML = '🎉 You unlocked <strong>FREE Express Shipping!</strong>';
-        progressBar.style.width = '100%';
-      } else {
-        const remaining = (this.freeShippingGoal - afterBundleSubtotal).toFixed(2);
-        const percent = Math.min(100, (afterBundleSubtotal / this.freeShippingGoal) * 100);
-        progressText.innerHTML = `Add <strong>$${remaining}</strong> more for FREE Express Shipping!`;
-        progressBar.style.width = `${percent}%`;
-      }
-    }
 
     // Render Cart Items
     const container = document.getElementById('cart-items-container');
@@ -386,7 +367,6 @@ class CartManager {
     const discountRow = document.getElementById('summary-discount-row');
     const discountLabelEl = document.getElementById('summary-discount-label');
     const discountEl = document.getElementById('summary-discount');
-    const shippingEl = document.getElementById('summary-shipping');
     const totalEl = document.getElementById('summary-total');
 
     if (subtotalEl) subtotalEl.textContent = `$${subtotal.toFixed(2)}`;
@@ -407,7 +387,6 @@ class CartManager {
         discountRow.classList.add('hidden');
       }
     }
-    if (shippingEl) shippingEl.textContent = shipping === 0 ? 'FREE' : `$${shipping.toFixed(2)}`;
     if (totalEl) totalEl.textContent = `$${total.toFixed(2)}`;
 
     // Update PayPal Pay Later Installment in Cart Drawer
