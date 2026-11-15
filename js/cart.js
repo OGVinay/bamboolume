@@ -69,13 +69,10 @@ class CartManager {
   }
 
   isPromoEligible(subtotalAmount = null) {
-    // Only 1 discount allowed per order: if bundle discount is active, promo code is not eligible
-    const { bundleDiscount, subtotal } = this.getTotals();
-    if (bundleDiscount > 0) return false;
     const rule = this.appliedPromo ? (this.getPromoRule(this.appliedPromo.code) || this.appliedPromo) : null;
     if (!rule || !rule.discount) return false;
     const minOrder = Number(rule.minOrder || 0);
-    const amount = subtotalAmount !== null ? subtotalAmount : subtotal;
+    const amount = subtotalAmount !== null ? subtotalAmount : this.getTotals().subtotal;
     return amount >= minOrder;
   }
 
@@ -106,6 +103,11 @@ class CartManager {
   }
 
   init() {
+    if (Array.isArray(this.cart)) {
+      this.cart.forEach(item => {
+        if (item.comboInfo) item.comboInfo = null;
+      });
+    }
     this.syncCartPricesWithCatalog();
     this.bindEvents();
     this.updateCartUI();
@@ -231,27 +233,16 @@ class CartManager {
     }
 
     this.saveCart();
-    const newTier = this.getProductBundleTier(product.id);
-    if (newTier && newTier.discountPct > prevTierPct) {
-      window.showToast(`Added "${displayName}" — ${newTier.label} (${newTier.discountPct}% OFF) applied!`, 'success');
-    } else {
-      window.showToast(`Added "${displayName}" to cart!`, 'success');
-    }
+    window.showToast(`Added "${displayName}" to cart!`, 'success');
   }
 
   updateQuantity(index, change) {
     if (index >= 0 && index < this.cart.length) {
-      const productId = this.cart[index].id;
-      const prevTierPct = this.getProductBundlePct(productId);
       this.cart[index].quantity += change;
       if (this.cart[index].quantity <= 0) {
         this.cart.splice(index, 1);
       }
       this.saveCart();
-      const newTier = this.getProductBundleTier(productId);
-      if (change > 0 && newTier && newTier.discountPct > prevTierPct) {
-        window.showToast(`Bundle unlocked: ${newTier.label} (${newTier.discountPct}% OFF)!`, 'success');
-      }
     }
   }
 
@@ -273,14 +264,6 @@ class CartManager {
     const code = input?.value.trim().toUpperCase();
 
     if (!code) return;
-
-    // Only 1 discount allowed per order: if bundle discount is active, do not allow promo stacking
-    const { bundleDiscount } = this.getTotals();
-    if (bundleDiscount > 0) {
-      window.showToast('A Combo bundle discount is already applied! Only 1 discount can be used per order.', 'info');
-      if (input) input.value = '';
-      return;
-    }
 
     const rule = this.getPromoRule(code);
     if (!rule) {
@@ -311,58 +294,39 @@ class CartManager {
   }
 
   getTotals() {
-    const productCounts = this.getProductUnitCounts();
     let subtotal = 0;
-    let bundleDiscount = 0;
     let itemCount = 0;
 
     const itemBreakdowns = this.cart.map(item => {
-      const { units, lineRegularTotal } = this.getItemUnitMetrics(item);
-      const totalForProduct = productCounts[item.id] || units;
-      const offers = this.getComboOffersForProduct(item.id);
-      const tier = offers ? this.getBundleTier(offers, totalForProduct) : null;
-      const bundlePct = tier ? tier.discountPct : 0;
-      const lineDiscount = Number((lineRegularTotal * (bundlePct / 100)).toFixed(2));
-      const lineNetTotal = Number((lineRegularTotal - lineDiscount).toFixed(2));
-
+      const units = Number(item.quantity || 0);
+      const unitPrice = Number(item.price || 0);
+      const lineRegularTotal = Number((unitPrice * units).toFixed(2));
       subtotal += lineRegularTotal;
-      bundleDiscount += lineDiscount;
       itemCount += units;
 
       return {
         units,
-        totalForProduct,
-        tier,
-        bundlePct,
+        totalForProduct: units,
+        tier: null,
+        bundlePct: 0,
         lineRegularTotal,
-        lineDiscount,
-        lineNetTotal
+        lineDiscount: 0,
+        lineNetTotal: lineRegularTotal
       };
     });
 
     subtotal = Number(subtotal.toFixed(2));
-    bundleDiscount = Number(bundleDiscount.toFixed(2));
-    const afterBundleSubtotal = Math.max(0, Number((subtotal - bundleDiscount).toFixed(2)));
+    const bundleDiscount = 0;
+    const afterBundleSubtotal = subtotal;
 
-    // Strictly ONE discount per order:
-    // If bundle discount is active, promo code does not stack.
-    // If no bundle discount, promo discount applies.
     let discount = 0;
     let promoDiscount = 0;
     let promoEligible = false;
     let promoMinOrder = 0;
 
     const activeRule = this.appliedPromo ? (this.getPromoRule(this.appliedPromo.code) || this.appliedPromo) : null;
-    if (activeRule) {
+    if (activeRule && activeRule.discount) {
       promoMinOrder = Number(activeRule.minOrder || 0);
-    }
-
-    if (bundleDiscount > 0) {
-      // Bundle discount takes precedence — only 1 discount allowed per order
-      discount = bundleDiscount;
-      promoDiscount = 0;
-      promoEligible = false;
-    } else if (activeRule && activeRule.discount) {
       promoEligible = Boolean(subtotal >= promoMinOrder);
       if (promoEligible) {
         promoDiscount = Number((subtotal * activeRule.discount).toFixed(2));
@@ -376,7 +340,7 @@ class CartManager {
 
     return {
       subtotal,
-      bundleDiscount,
+      bundleDiscount: 0,
       promoDiscount,
       promoEligible,
       promoMinOrder,
@@ -422,13 +386,11 @@ class CartManager {
                 <div class="cart-item-title">${item.name}</div>
                 <div class="card-category" style="font-size: 0.72rem; display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.2rem;">
                   ${item.selectedSize ? `<span style="color: var(--deep-forest); font-weight: 700; background: rgba(214,166,83,0.22); padding: 0.1rem 0.4rem; border-radius: 4px;">Size: ${item.selectedSize}</span>` : ''}
-                  ${b.bundlePct > 0 ? `<span style="color: #065f46; font-weight: 700; background: rgba(16,185,129,0.18); padding: 0.1rem 0.4rem; border-radius: 4px; border: 1px solid rgba(16,185,129,0.3);"><i data-lucide="sparkles" style="width: 10px; height: 10px; vertical-align: middle;"></i> Bundle (${b.totalForProduct}×): ${b.bundlePct}% OFF (Saved $${b.lineDiscount.toFixed(2)})</span>` : ''}
                   ${item.selectedColor ? `<span>Finish: ${item.selectedColor}</span>` : ''}
                 </div>
               </div>
               <div class="cart-item-price">
-                ${b.bundlePct > 0 ? `<span style="text-decoration: line-through; color: var(--text-muted); font-size: 0.82rem; font-weight: 500; margin-right: 0.35rem;">$${b.lineRegularTotal.toFixed(2)}</span>` : ''}
-                $${b.lineNetTotal.toFixed(2)}
+                $${(Number(item.price) * Number(item.quantity)).toFixed(2)}
               </div>
               <div class="cart-qty-ctrl">
                 <button class="qty-btn" onclick="window.cart.updateQuantity(${index}, -1)">-</button>
@@ -478,11 +440,7 @@ class CartManager {
       if (discount > 0) {
         discountRow.classList.remove('hidden');
         if (discountLabelEl) {
-          if (bundleDiscount > 0) {
-            discountLabelEl.textContent = 'Combo Bundle Discount';
-          } else {
-            discountLabelEl.textContent = 'Promo Code Discount';
-          }
+          discountLabelEl.textContent = 'Promo Discount';
         }
         discountEl.textContent = `-$${discount.toFixed(2)}`;
       } else {
