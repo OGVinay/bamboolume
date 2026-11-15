@@ -4,10 +4,7 @@
 
 const PROMO_RULES = {
   NATURE10: { code: 'NATURE10', discount: 0.10, minOrder: 200, label: '10% OFF Orders $200+' },
-  SOLAR15: { code: 'SOLAR15', discount: 0.15, minOrder: 300, label: '15% OFF Orders $300+' },
-  // Backward compatibility aliases
-  NATURE15: { code: 'NATURE10', discount: 0.10, minOrder: 200, label: '10% OFF Orders $200+' },
-  SOLAR20: { code: 'SOLAR15', discount: 0.15, minOrder: 300, label: '15% OFF Orders $300+' }
+  SOLAR15: { code: 'SOLAR15', discount: 0.15, minOrder: 300, label: '15% OFF Orders $300+' }
 };
 
 class CartManager {
@@ -50,7 +47,11 @@ class CartManager {
       if (!data) return null;
       const parsed = JSON.parse(data);
       const rule = this.getPromoRule(parsed?.code);
-      return rule ? { ...rule } : parsed;
+      if (!rule) {
+        localStorage.removeItem(this.promoKey);
+        return null;
+      }
+      return { ...rule };
     } catch (e) {
       return null;
     }
@@ -450,11 +451,7 @@ class CartManager {
     const promoStatus = document.getElementById('promo-status');
     const promoName = document.getElementById('promo-name');
     if (promoStatus && promoName) {
-      if (bundleDiscount > 0) {
-        promoStatus.classList.remove('hidden');
-        promoStatus.style.color = '#065f46';
-        promoName.textContent = '✓ Combo volume discount active (1 discount per order)';
-      } else if (this.appliedPromo) {
+      if (this.appliedPromo && bundleDiscount === 0) {
         promoStatus.classList.remove('hidden');
         if (promoEligible) {
           promoStatus.style.color = 'var(--bamboo-green)';
