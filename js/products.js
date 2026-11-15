@@ -1,3 +1,15 @@
+/**
+ * BAMBOOLUME Combo Volume Discount Offers (Up to Combo of 5)
+ * Available on signature models (except Kyoto Kadomatsu which features authentic modular culms)
+ */
+const STANDARD_COMBO_OFFERS = [
+  { qty: 1, label: "Single (1x)", discountPct: 0, tag: "Standard Price" },
+  { qty: 2, label: "Duo Combo (2x)", discountPct: 10, tag: "Save 10%" },
+  { qty: 3, label: "Trio Combo (3x)", discountPct: 13, tag: "Save 13%" },
+  { qty: 4, label: "Garden Quad (4x)", discountPct: 16, tag: "Save 16%" },
+  { qty: 5, label: "Estate Set (5x)", discountPct: 20, tag: "Save 20% • Best Value" }
+];
+
 const PRODUCTS_DATA = [
   {
     id: "lantern-1",
@@ -61,7 +73,8 @@ const PRODUCTS_DATA = [
           desc: "Full teardrop bulbous basket weave (24cm height × 20cm diameter / 9.45\" × 7.87\"). Eye-catching focal silhouette for tall trees, gazebo centers, and veranda eaves."
         }
       ]
-    }
+    },
+    comboOffers: STANDARD_COMBO_OFFERS
   },
   {
     id: "lantern-2",
@@ -185,7 +198,8 @@ const PRODUCTS_DATA = [
     },
     variants: {
       colors: ["Natural Golden Bamboo", "Sun-Bleached Sand", "Deep Espresso"]
-    }
+    },
+    comboOffers: STANDARD_COMBO_OFFERS
   },
   {
     id: "lantern-4",
@@ -225,7 +239,8 @@ const PRODUCTS_DATA = [
     },
     variants: {
       colors: ["Natural Blonde Bamboo", "Caramel Smoked Bamboo", "Weathered Driftwood"]
-    }
+    },
+    comboOffers: STANDARD_COMBO_OFFERS
   }
 ];
 

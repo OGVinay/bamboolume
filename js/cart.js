@@ -69,10 +69,12 @@ class CartManager {
   }
 
   isPromoEligible(subtotalAmount = null) {
+    const { bundleDiscount, subtotal } = this.getTotals();
+    if (bundleDiscount > 0) return false;
     const rule = this.appliedPromo ? (this.getPromoRule(this.appliedPromo.code) || this.appliedPromo) : null;
     if (!rule || !rule.discount) return false;
     const minOrder = Number(rule.minOrder || 0);
-    const amount = subtotalAmount !== null ? subtotalAmount : this.getTotals().subtotal;
+    const amount = subtotalAmount !== null ? subtotalAmount : subtotal;
     return amount >= minOrder;
   }
 
@@ -294,30 +296,38 @@ class CartManager {
   }
 
   getTotals() {
+    const productCounts = this.getProductUnitCounts();
     let subtotal = 0;
+    let bundleDiscount = 0;
     let itemCount = 0;
 
     const itemBreakdowns = this.cart.map(item => {
-      const units = Number(item.quantity || 0);
-      const unitPrice = Number(item.price || 0);
-      const lineRegularTotal = Number((unitPrice * units).toFixed(2));
+      const { units, lineRegularTotal } = this.getItemUnitMetrics(item);
+      const totalForProduct = productCounts[item.id] || units;
+      const offers = this.getComboOffersForProduct(item.id);
+      const tier = offers ? this.getBundleTier(offers, totalForProduct) : null;
+      const bundlePct = tier ? tier.discountPct : 0;
+      const lineDiscount = Number((lineRegularTotal * (bundlePct / 100)).toFixed(2));
+      const lineNetTotal = Number((lineRegularTotal - lineDiscount).toFixed(2));
+
       subtotal += lineRegularTotal;
+      bundleDiscount += lineDiscount;
       itemCount += units;
 
       return {
         units,
-        totalForProduct: units,
-        tier: null,
-        bundlePct: 0,
+        totalForProduct,
+        tier,
+        bundlePct,
         lineRegularTotal,
-        lineDiscount: 0,
-        lineNetTotal: lineRegularTotal
+        lineDiscount,
+        lineNetTotal
       };
     });
 
     subtotal = Number(subtotal.toFixed(2));
-    const bundleDiscount = 0;
-    const afterBundleSubtotal = subtotal;
+    bundleDiscount = Number(bundleDiscount.toFixed(2));
+    const afterBundleSubtotal = Math.max(0, Number((subtotal - bundleDiscount).toFixed(2)));
 
     let discount = 0;
     let promoDiscount = 0;
@@ -327,6 +337,15 @@ class CartManager {
     const activeRule = this.appliedPromo ? (this.getPromoRule(this.appliedPromo.code) || this.appliedPromo) : null;
     if (activeRule && activeRule.discount) {
       promoMinOrder = Number(activeRule.minOrder || 0);
+    }
+
+    // Only ONE discount per order:
+    // If a combo bundle discount is active, promo codes do not stack.
+    if (bundleDiscount > 0) {
+      discount = bundleDiscount;
+      promoDiscount = 0;
+      promoEligible = false;
+    } else if (activeRule && activeRule.discount) {
       promoEligible = Boolean(subtotal >= promoMinOrder);
       if (promoEligible) {
         promoDiscount = Number((subtotal * activeRule.discount).toFixed(2));
@@ -340,7 +359,7 @@ class CartManager {
 
     return {
       subtotal,
-      bundleDiscount: 0,
+      bundleDiscount,
       promoDiscount,
       promoEligible,
       promoMinOrder,
@@ -440,7 +459,11 @@ class CartManager {
       if (discount > 0) {
         discountRow.classList.remove('hidden');
         if (discountLabelEl) {
-          discountLabelEl.textContent = 'Promo Discount';
+          if (bundleDiscount > 0) {
+            discountLabelEl.textContent = 'Bundle Discount';
+          } else {
+            discountLabelEl.textContent = 'Promo Discount';
+          }
         }
         discountEl.textContent = `-$${discount.toFixed(2)}`;
       } else {

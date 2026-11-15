@@ -81,8 +81,14 @@ class ShopifyIntegration {
 
   /**
    * Read currently applied cart promo code, if any
+   * Strictly enforces ONE discount per order: if a bundle discount is active, no promo code is passed
    */
   getActiveDiscountCode() {
+    // Only 1 discount allowed per order: if bundle discount is active, do not pass promo code
+    const totals = window.cart?.getTotals?.();
+    if (totals && totals.bundleDiscount > 0) {
+      return null;
+    }
     const code = window.cart?.appliedPromo?.code;
     if (!code) return null;
     if (typeof window.cart?.isPromoEligible === 'function' && !window.cart.isPromoEligible()) {
