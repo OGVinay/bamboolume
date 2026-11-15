@@ -233,16 +233,27 @@ class CartManager {
     }
 
     this.saveCart();
-    window.showToast(`Added "${displayName}" to cart!`, 'success');
+    const newTier = this.getProductBundleTier(product.id);
+    if (newTier && newTier.discountPct > prevTierPct) {
+      window.showToast(`Added "${displayName}" — Combo Offer (${newTier.label}: ${newTier.discountPct}% OFF) applied!`, 'success');
+    } else {
+      window.showToast(`Added "${displayName}" to cart!`, 'success');
+    }
   }
 
   updateQuantity(index, change) {
     if (index >= 0 && index < this.cart.length) {
+      const productId = this.cart[index].id;
+      const prevTierPct = this.getProductBundlePct(productId);
       this.cart[index].quantity += change;
       if (this.cart[index].quantity <= 0) {
         this.cart.splice(index, 1);
       }
       this.saveCart();
+      const newTier = this.getProductBundleTier(productId);
+      if (change > 0 && newTier && newTier.discountPct > prevTierPct) {
+        window.showToast(`Combo Offer unlocked: ${newTier.label} (${newTier.discountPct}% OFF)!`, 'success');
+      }
     }
   }
 
@@ -379,19 +390,33 @@ class CartManager {
       if (container) {
         container.innerHTML = this.cart.map((item, index) => {
           const b = itemBreakdowns[index];
+          const offers = this.getComboOffersForProduct(item.id);
+          const hasComboOffers = Boolean(offers && offers.some(o => o.discountPct > 0));
           return `
           <div class="cart-item">
             <img src="${item.image}" alt="${item.name}" class="cart-item-img">
             <div class="cart-item-info">
               <div>
                 <div class="cart-item-title">${item.name}</div>
-                <div class="card-category" style="font-size: 0.72rem; display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.2rem;">
+                <div class="card-category" style="font-size: 0.72rem; display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.2rem; align-items: center;">
                   ${item.selectedSize ? `<span style="color: var(--deep-forest); font-weight: 700; background: rgba(214,166,83,0.22); padding: 0.1rem 0.4rem; border-radius: 4px;">Size: ${item.selectedSize}</span>` : ''}
                   ${item.selectedColor ? `<span>Finish: ${item.selectedColor}</span>` : ''}
+                  ${b && b.bundlePct > 0 ? `
+                    <span style="color: #065f46; font-weight: 700; background: rgba(16,185,129,0.18); padding: 0.15rem 0.5rem; border-radius: 4px; border: 1px solid rgba(16,185,129,0.3); font-size: 0.72rem; display: inline-flex; align-items: center; gap: 0.25rem;">
+                      <i data-lucide="sparkles" style="width: 11px; height: 11px;"></i>
+                      Combo Offer (${b.tier ? b.tier.label : `${b.totalForProduct}×`}): ${b.bundlePct}% OFF (Saved $${b.lineDiscount.toFixed(2)})
+                    </span>
+                  ` : (hasComboOffers ? `
+                    <span style="color: #92400e; font-weight: 600; background: rgba(245,158,11,0.12); padding: 0.12rem 0.45rem; border-radius: 4px; border: 1px dashed rgba(245,158,11,0.35); font-size: 0.7rem; display: inline-flex; align-items: center; gap: 0.25rem;">
+                      <i data-lucide="tag" style="width: 10px; height: 10px;"></i>
+                      Combo Offer: Buy 2+ to save up to 20% OFF
+                    </span>
+                  ` : '')}
                 </div>
               </div>
               <div class="cart-item-price">
-                $${(Number(item.price) * Number(item.quantity)).toFixed(2)}
+                ${b && b.bundlePct > 0 ? `<span style="text-decoration: line-through; color: var(--text-muted); font-size: 0.82rem; font-weight: 500; margin-right: 0.35rem;">$${b.lineRegularTotal.toFixed(2)}</span>` : ''}
+                <span ${b && b.bundlePct > 0 ? 'style="color: #065f46; font-weight: 700;"' : ''}>$${b && b.bundlePct > 0 ? b.lineNetTotal.toFixed(2) : (Number(item.price) * Number(item.quantity)).toFixed(2)}</span>
               </div>
               <div class="cart-qty-ctrl">
                 <button class="qty-btn" onclick="window.cart.updateQuantity(${index}, -1)">-</button>
@@ -431,27 +456,53 @@ class CartManager {
 
     // Summary Calculations
     const subtotalEl = document.getElementById('summary-subtotal');
+    const comboRow = document.getElementById('summary-combo-row');
+    const comboDiscountEl = document.getElementById('summary-combo-discount');
     const discountRow = document.getElementById('summary-discount-row');
     const discountLabelEl = document.getElementById('summary-discount-label');
     const discountEl = document.getElementById('summary-discount');
     const totalEl = document.getElementById('summary-total');
 
     if (subtotalEl) subtotalEl.textContent = `$${subtotal.toFixed(2)}`;
-    if (discountRow && discountEl) {
-      if (discount > 0) {
-        discountRow.classList.remove('hidden');
-        if (discountLabelEl) {
-          if (bundleDiscount > 0 && promoDiscount > 0) {
-            discountLabelEl.textContent = 'Bundle & Promo Discount';
-          } else if (bundleDiscount > 0) {
-            discountLabelEl.textContent = 'Bundle Discount';
-          } else {
-            discountLabelEl.textContent = 'Promo Discount';
-          }
-        }
-        discountEl.textContent = `-$${discount.toFixed(2)}`;
+
+    // Show Combo Offer Savings row if combo discount is active
+    if (comboRow && comboDiscountEl) {
+      if (bundleDiscount > 0) {
+        comboRow.classList.remove('hidden');
+        comboDiscountEl.textContent = `-$${bundleDiscount.toFixed(2)}`;
       } else {
-        discountRow.classList.add('hidden');
+        comboRow.classList.add('hidden');
+      }
+    }
+
+    // Show Promo Discount row if promo discount is active
+    if (discountRow && discountEl) {
+      if (comboRow) {
+        if (promoDiscount > 0) {
+          discountRow.classList.remove('hidden');
+          if (discountLabelEl) {
+            discountLabelEl.textContent = `Promo Discount (${this.appliedPromo?.code || 'Code'})`;
+          }
+          discountEl.textContent = `-$${promoDiscount.toFixed(2)}`;
+        } else {
+          discountRow.classList.add('hidden');
+        }
+      } else {
+        if (discount > 0) {
+          discountRow.classList.remove('hidden');
+          if (discountLabelEl) {
+            if (bundleDiscount > 0 && promoDiscount > 0) {
+              discountLabelEl.textContent = 'Combo & Promo Discount';
+            } else if (bundleDiscount > 0) {
+              discountLabelEl.textContent = 'Combo Offer Discount';
+            } else {
+              discountLabelEl.textContent = 'Promo Discount';
+            }
+          }
+          discountEl.textContent = `-$${discount.toFixed(2)}`;
+        } else {
+          discountRow.classList.add('hidden');
+        }
       }
     }
     if (totalEl) totalEl.textContent = `$${total.toFixed(2)}`;
