@@ -64,11 +64,14 @@ class CartManager {
     this.updateCartUI();
   }
 
-  isPromoEligible(afterBundleSubtotal = null) {
+  isPromoEligible(subtotalAmount = null) {
+    // Only 1 discount allowed per order: if bundle discount is active, promo code is not eligible
+    const { bundleDiscount, subtotal } = this.getTotals();
+    if (bundleDiscount > 0) return false;
     const rule = this.appliedPromo ? (this.getPromoRule(this.appliedPromo.code) || this.appliedPromo) : null;
     if (!rule || !rule.discount) return false;
     const minOrder = Number(rule.minOrder || 0);
-    const amount = afterBundleSubtotal !== null ? afterBundleSubtotal : this.getTotals().afterBundleSubtotal;
+    const amount = subtotalAmount !== null ? subtotalAmount : subtotal;
     return amount >= minOrder;
   }
 
@@ -267,6 +270,14 @@ class CartManager {
 
     if (!code) return;
 
+    // Only 1 discount allowed per order: if bundle discount is active, do not allow promo stacking
+    const { bundleDiscount } = this.getTotals();
+    if (bundleDiscount > 0) {
+      window.showToast('A Combo bundle discount is already applied! Only 1 discount can be used per order.', 'info');
+      if (input) input.value = '';
+      return;
+    }
+
     const rule = this.getPromoRule(code);
     if (!rule) {
       window.showToast('Invalid promo code. Try NATURE15 ($200+) or SOLAR20 ($300+)', 'info');
@@ -274,9 +285,9 @@ class CartManager {
       return;
     }
 
-    const { afterBundleSubtotal } = this.getTotals();
-    if (afterBundleSubtotal < rule.minOrder) {
-      const needed = (rule.minOrder - afterBundleSubtotal).toFixed(2);
+    const { subtotal } = this.getTotals();
+    if (subtotal < rule.minOrder) {
+      const needed = (rule.minOrder - subtotal).toFixed(2);
       window.showToast(
         `${rule.code} requires an order over $${rule.minOrder.toFixed(2)} — add $${needed} more to unlock ${Math.round(rule.discount * 100)}% OFF!`,
         'info'
@@ -329,14 +340,32 @@ class CartManager {
     bundleDiscount = Number(bundleDiscount.toFixed(2));
     const afterBundleSubtotal = Math.max(0, Number((subtotal - bundleDiscount).toFixed(2)));
 
-    const activeRule = this.appliedPromo ? (this.getPromoRule(this.appliedPromo.code) || this.appliedPromo) : null;
-    const promoMinOrder = Number(activeRule?.minOrder || 0);
-    const promoEligible = Boolean(activeRule && activeRule.discount && afterBundleSubtotal >= promoMinOrder);
-    const promoDiscount = promoEligible
-      ? Number((afterBundleSubtotal * activeRule.discount).toFixed(2))
-      : 0;
+    // Strictly ONE discount per order:
+    // If bundle discount is active, promo code does not stack.
+    // If no bundle discount, promo discount applies.
+    let discount = 0;
+    let promoDiscount = 0;
+    let promoEligible = false;
+    let promoMinOrder = 0;
 
-    const discount = Number((bundleDiscount + promoDiscount).toFixed(2));
+    const activeRule = this.appliedPromo ? (this.getPromoRule(this.appliedPromo.code) || this.appliedPromo) : null;
+    if (activeRule) {
+      promoMinOrder = Number(activeRule.minOrder || 0);
+    }
+
+    if (bundleDiscount > 0) {
+      // Bundle discount takes precedence — only 1 discount allowed per order
+      discount = bundleDiscount;
+      promoDiscount = 0;
+      promoEligible = false;
+    } else if (activeRule && activeRule.discount) {
+      promoEligible = Boolean(subtotal >= promoMinOrder);
+      if (promoEligible) {
+        promoDiscount = Number((subtotal * activeRule.discount).toFixed(2));
+        discount = promoDiscount;
+      }
+    }
+
     const netSubtotal = Math.max(0, Number((subtotal - discount).toFixed(2)));
     const shipping = 0;
     const total = netSubtotal;
@@ -418,13 +447,17 @@ class CartManager {
     const promoStatus = document.getElementById('promo-status');
     const promoName = document.getElementById('promo-name');
     if (promoStatus && promoName) {
-      if (this.appliedPromo) {
+      if (bundleDiscount > 0) {
+        promoStatus.classList.remove('hidden');
+        promoStatus.style.color = '#065f46';
+        promoName.textContent = '✓ Combo volume discount active (1 discount per order)';
+      } else if (this.appliedPromo) {
         promoStatus.classList.remove('hidden');
         if (promoEligible) {
           promoStatus.style.color = 'var(--bamboo-green)';
           promoName.textContent = `${this.appliedPromo.code} Applied (${this.appliedPromo.label})`;
         } else {
-          const shortfall = Math.max(0, promoMinOrder - afterBundleSubtotal).toFixed(2);
+          const shortfall = Math.max(0, promoMinOrder - subtotal).toFixed(2);
           promoStatus.style.color = '#b45309';
           promoName.textContent = `${this.appliedPromo.code} Needs $${promoMinOrder}+ Order (Add $${shortfall} more)`;
         }
@@ -445,12 +478,10 @@ class CartManager {
       if (discount > 0) {
         discountRow.classList.remove('hidden');
         if (discountLabelEl) {
-          if (bundleDiscount > 0 && promoDiscount > 0) {
-            discountLabelEl.textContent = 'Bundle & Promo Discount';
-          } else if (bundleDiscount > 0) {
-            discountLabelEl.textContent = 'Bundle Discount';
+          if (bundleDiscount > 0) {
+            discountLabelEl.textContent = 'Combo Bundle Discount';
           } else {
-            discountLabelEl.textContent = 'Special Discount';
+            discountLabelEl.textContent = 'Promo Code Discount';
           }
         }
         discountEl.textContent = `-$${discount.toFixed(2)}`;
