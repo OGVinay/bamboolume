@@ -3,8 +3,11 @@
  */
 
 const PROMO_RULES = {
-  NATURE15: { code: 'NATURE15', discount: 0.15, minOrder: 200, label: '15% OFF Orders $200+' },
-  SOLAR20: { code: 'SOLAR20', discount: 0.20, minOrder: 300, label: '20% OFF Orders $300+' }
+  NATURE10: { code: 'NATURE10', discount: 0.10, minOrder: 200, label: '10% OFF Orders $200+' },
+  SOLAR15: { code: 'SOLAR15', discount: 0.15, minOrder: 300, label: '15% OFF Orders $300+' },
+  // Backward compatibility aliases
+  NATURE15: { code: 'NATURE10', discount: 0.10, minOrder: 200, label: '10% OFF Orders $200+' },
+  SOLAR20: { code: 'SOLAR15', discount: 0.15, minOrder: 300, label: '15% OFF Orders $300+' }
 };
 
 class CartManager {
@@ -280,7 +283,7 @@ class CartManager {
 
     const rule = this.getPromoRule(code);
     if (!rule) {
-      window.showToast('Invalid promo code. Try NATURE15 ($200+) or SOLAR20 ($300+)', 'info');
+      window.showToast('Invalid promo code. Try NATURE10 ($200+) or SOLAR15 ($300+)', 'info');
       if (input) input.value = '';
       return;
     }
