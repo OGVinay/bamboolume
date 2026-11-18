@@ -7,6 +7,7 @@
 class ShopifyIntegration {
   constructor() {
     this.storeDomain = 'auv1g7-nc.myshopify.com';
+    this.checkoutDomain = 'checkout.bamboolume.com';
     this.storefrontToken = '66bacc09149b1266c889f8371962cdbe';
     this.graphqlEndpoint = `https://${this.storeDomain}/api/2025-01/graphql.json`;
     this.variantInventory = {};
@@ -114,7 +115,7 @@ class ShopifyIntegration {
       }
     });
 
-    let checkoutUrl = `https://${this.storeDomain}/cart/${parts.join(',')}`;
+    let checkoutUrl = `https://${this.checkoutDomain}/cart/${parts.join(',')}`;
 
     // Add optional prefilled checkout fields & active discount code
     const params = new URLSearchParams();
@@ -269,7 +270,7 @@ class ShopifyIntegration {
     } else {
       parts = `${variantResolution}:${quantity}`;
     }
-    let url = `https://${this.storeDomain}/cart/${parts}`;
+    let url = `https://${this.checkoutDomain}/cart/${parts}`;
     const discountCode = this.getActiveDiscountCode();
     if (discountCode) {
       url += `?discount=${encodeURIComponent(discountCode)}`;
